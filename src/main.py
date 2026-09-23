@@ -278,7 +278,8 @@ def run_cycle(
         changed = True
 
     # --- Menú del menjador (si toca) ---
-    menu_res = maybe_publish_menu(cfg, state, client, now)
+    # Hora local: l'slot del menú es compara amb l'hora del centre, no amb UTC.
+    menu_res = maybe_publish_menu(cfg, state, client, now.astimezone(_local_tz(cfg)))
     if menu_res.errors:
         result.errors.extend(menu_res.errors)
     if menu_res.published or menu_res.failed or menu_res.pin_refreshed:

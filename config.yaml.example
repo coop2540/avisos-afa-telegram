@@ -92,6 +92,8 @@ menu:
   # Menú del menjador: publica el menú de demà el dia anterior a l'hora indicada,
   # als topics per variant. L'URL del PDF es resol dinàmicament de la pàgina del
   # menjador (canvia cada mes). Vegeu specs/daily-menu.
+  # Estalvi de peticions al centre: abans de l'slot, com a molt 1 revisió d'URL
+  # al dia; a l'slot, un cicle complet; un cop publicat, 0 fins l'endemà.
   enabled: false
   hora: "19:00"          # hora local de publicació (dia anterior)
   # Pàgina del menjador on es resol l'enllaç del PDF del menú.

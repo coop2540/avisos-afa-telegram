@@ -75,12 +75,16 @@ def test_menu_state_round_trip(tmp_path):
     state.menu_pdf_url = "https://x.test/Basal.pdf"
     state.menu_posted = {"basal": "2026-09-24", "sense_porc": "2026-09-24"}
     state.menu_pin_ids = {"basal": 111, "sense_porc": 222}
+    state.menu_url_checked_on = "2026-09-23"
+    state.menu_slot_done_on = "2026-09-23"
     state.save(path)
 
     loaded = State.load(path)
     assert loaded.menu_pdf_url == "https://x.test/Basal.pdf"
     assert loaded.menu_posted == {"basal": "2026-09-24", "sense_porc": "2026-09-24"}
     assert loaded.menu_pin_ids == {"basal": 111, "sense_porc": 222}
+    assert loaded.menu_url_checked_on == "2026-09-23"
+    assert loaded.menu_slot_done_on == "2026-09-23"
 
 
 def test_old_state_without_menu_keys(tmp_path):
@@ -88,5 +92,7 @@ def test_old_state_without_menu_keys(tmp_path):
     path.write_text('{"version": 1, "rss_guids": ["a"]}', encoding="utf-8")
     state = State.load(path)
     assert state.menu_pdf_url is None
+    assert state.menu_url_checked_on is None
+    assert state.menu_slot_done_on is None
     assert state.menu_posted == {}
     assert state.menu_pin_ids == {}

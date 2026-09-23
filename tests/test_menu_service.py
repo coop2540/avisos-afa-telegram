@@ -227,3 +227,101 @@ def test_disabled_menu_does_nothing():
     res = maybe_publish_menu(cfg, state, client, now, menu_url="https://x.test/Basal.pdf")
     assert res.published == 0
     assert client.sent == []
+
+
+# --- Estalvi de peticions a la web del centre --------------------------------
+
+
+def test_before_slot_checks_url_only_once_per_day(monkeypatch):
+    """Abans de l'slot: 1a revisió d'URL al dia; després, 0 peticions."""
+    cfg = _cfg()
+    state = State()
+    client = FakeClient()
+    calls = {"n": 0}
+
+    def fake_fetch(**_k):
+        calls["n"] += 1
+        return "https://x.test/Basal.pdf"
+
+    monkeypatch.setattr(menu_mod, "fetch_menu_url", fake_fetch)
+    now = datetime(2026, 9, 23, 10, 0)  # abans de les 19:00
+
+    res1 = maybe_publish_menu(cfg, state, client, now)
+    assert calls["n"] == 1
+    assert state.menu_url_checked_on == "2026-09-23"
+    assert res1.published == 0  # no publica abans de l'slot
+
+    res2 = maybe_publish_menu(cfg, state, client, now)
+    assert calls["n"] == 1  # cap petició nova
+    assert res2.published == 0
+
+
+def test_after_slot_full_cycle_once_then_skips(monkeypatch):
+    """A l'slot: cicle complet un cop; després, 0 peticions fins l'endemà."""
+    cfg = _cfg()
+    state = State()
+    client = FakeClient()
+    calls = {"n": 0}
+
+    def fake_fetch(**_k):
+        calls["n"] += 1
+        return "https://x.test/Basal.pdf"
+
+    monkeypatch.setattr(menu_mod, "fetch_menu_url", fake_fetch)
+    monkeypatch.setattr(menu_mod, "load_menu", lambda *a, **k: ["PLAT"])
+    now = datetime(2026, 9, 23, 19, 0)
+
+    res1 = maybe_publish_menu(
+        cfg, state, client, now, calendar=SCHOOL_CAL
+    )
+    assert calls["n"] == 1
+    assert res1.published == 2
+    assert state.menu_slot_done_on == "2026-09-23"
+
+    res2 = maybe_publish_menu(
+        cfg, state, client, now, calendar=SCHOOL_CAL
+    )
+    assert calls["n"] == 1  # cap petició nova
+    assert res2.published == 0
+    assert client.sent[0][0]  # només els missatges del primer cicle
+
+
+def test_slot_not_marked_done_if_send_falls(monkeypatch):
+    """Si Telegram falla, el slot NO es marca i es reintentarà."""
+    cfg = _cfg()
+    state = State()
+    client = FakeClient(ok_map={27: False})
+    monkeypatch.setattr(menu_mod, "load_menu", lambda *a, **k: ["PLAT"])
+    now = datetime(2026, 9, 23, 19, 0)
+
+    maybe_publish_menu(cfg, state, client, now, calendar=SCHOOL_CAL,
+                       menu_url="https://x.test/Basal.pdf")
+    assert state.menu_slot_done_on is None  # pendent de reintent
+    assert "sense_porc" not in state.menu_posted
+
+
+def test_slot_marked_done_when_no_cell(monkeypatch):
+    """Sense cel·la al PDF: compta com a resolt (no es reintentarà)."""
+    cfg = _cfg()
+    state = State()
+    client = FakeClient()
+    monkeypatch.setattr(menu_mod, "load_menu", lambda *a, **k: None)
+    now = datetime(2026, 9, 23, 19, 0)
+
+    res = maybe_publish_menu(cfg, state, client, now, calendar=SCHOOL_CAL,
+                             menu_url="https://x.test/Basal.pdf")
+    assert res.published == 0
+    assert state.menu_slot_done_on == "2026-09-23"
+
+
+def test_slot_done_for_non_school_day(monkeypatch):
+    """Divendres al vespre (demà dissabte): es marca resolt sense publicar."""
+    cfg = _cfg()
+    state = State()
+    client = FakeClient()
+    now = datetime(2026, 9, 25, 19, 0)  # divendres
+
+    res = maybe_publish_menu(cfg, state, client, now, calendar=SCHOOL_CAL,
+                             menu_url="https://x.test/Basal.pdf")
+    assert res.published == 0
+    assert state.menu_slot_done_on == "2026-09-25"
