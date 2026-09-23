@@ -33,14 +33,10 @@ Temps aproximat: 15 minuts.
 3. Tria un **nom visible** (p. ex. `Avisos AFA Escola X`).
 4. Tria un **nom d'usuari** que acabi en `bot`
    (p. ex. `afa_escolax_avisos_bot`). Ha de ser únic.
-5. BotFather respon amb un **token** semblant a:
+5. BotFather respon amb un **token** (una cadena llarga: uns dígits, dos punts
+   i una part alfanumèrica). Aquest és el `TELEGRAM_BOT_TOKEN`.
 
-   ```
-   123456789:AAEabcDEFghiJKLmnoPQRstuVWXyz123456
-   ```
-
-   Aquest és el `TELEGRAM_BOT_TOKEN`. **No el posis mai al repositori ni el
-   comparteixis**; anirà a `.env`.
+   **No el posis mai al repositori ni el comparteixis**; anirà a `.env`.
 
 6. Opcional: amb `/setdescription` i `/setuserpic` li pots donar la identitat
    de l'AFA.
@@ -127,7 +123,7 @@ cp .env.example .env
 A **`.env`**:
 
 ```dotenv
-TELEGRAM_BOT_TOKEN=123456789:AAEabcDEF...
+TELEGRAM_BOT_TOKEN=<el-token-que-t'ha-donat-BotFather>
 ```
 
 A **`config.yaml`**, posa el `chat_id` i els thread ids:
