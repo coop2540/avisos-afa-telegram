@@ -45,5 +45,34 @@ def test_plain_summary_truncates():
     assert plain_summary(long, max_chars=50).endswith("…")
 
 
+def test_plain_summary_preserves_list_lines():
+    html = "<p>PREINSCRIPCIÓ</p><p>16.06 Llista d'espera</p><p>17.06 Llista d'admesos</p>"
+    out = plain_summary(html)
+    assert out.splitlines() == [
+        "PREINSCRIPCIÓ",
+        "16.06 Llista d'espera",
+        "17.06 Llista d'admesos",
+    ]
+
+
+def test_plain_summary_keeps_inline_text_together():
+    out = plain_summary("<p>Reunió <b>important</b> el dia 15</p>")
+    assert out == "Reunió important el dia 15"
+
+
+def test_plain_summary_truncates_on_line_boundary():
+    html = "<p>" + "</p><p>".join(["Línia llarga " + str(i) for i in range(10)]) + "</p>"
+    out = plain_summary(html, max_chars=60)
+    assert out.endswith("…")
+    # no ha de tallar a mitja línia si hi ha un salt de línia raonable
+    assert not out.rstrip("…").endswith(" ")
+    assert len(out) <= 60
+
+
+def test_plain_summary_handles_br():
+    out = plain_summary("a<br>b<br>c")
+    assert out.splitlines() == ["a", "b", "c"]
+
+
 def test_welcome_message_mentions_afa():
     assert "AFA" in welcome_message()

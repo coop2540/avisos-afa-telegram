@@ -40,12 +40,23 @@ def parse_feed(data: bytes) -> list[RssItem]:
             for tag in (entry.get("tags") or [])
             if tag.get("term")
         ]
+        # Preferim el contingut complet (content:encoded) perquè conserva
+        # l'estructura (paràgrafs, llistes); el `description` sovint ve pla.
+        summary = ""
+        content = entry.get("content")
+        if content:
+            try:
+                summary = str(content[0].get("value") or "")
+            except (IndexError, AttributeError, TypeError):
+                summary = ""
+        if not summary:
+            summary = str(entry.get("summary") or "")
         items.append(
             RssItem(
                 guid=guid,
                 title=str(entry.get("title") or "(sense títol)").strip(),
                 link=link,
-                summary=str(entry.get("summary") or "").strip(),
+                summary=summary.strip(),
                 categories=categories,
                 published=entry.get("published"),
             )

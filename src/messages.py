@@ -14,7 +14,13 @@ from bs4 import BeautifulSoup
 from .i18n import DEFAULT_LANG, translate
 
 MAX_SUMMARY_CHARS = 300
-_WS_RE = re.compile(r"\s+")
+_WS_RE = re.compile(r"[ \t\u00a0]+")
+
+# Etiquetes de bloc: separen línies (no s'han de "enganxar" al text del costat).
+_BLOCK_TAGS = {
+    "p", "div", "br", "li", "ul", "ol", "tr", "td", "th", "table",
+    "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "section", "article", "pre",
+}
 
 PARSE_MODE = "HTML"
 
@@ -23,14 +29,34 @@ def _esc(value: str) -> str:
     return html.escape(value or "", quote=False)
 
 
+def _html_to_lines(raw: str) -> list[str]:
+    """Converteix HTML en línies de text pla, respectant paràgrafs i llistes."""
+    soup = BeautifulSoup(raw, "html.parser")
+    for tag in soup.find_all(True):
+        if tag.name in _BLOCK_TAGS:
+            tag.insert_before("\n")
+            tag.insert_after("\n")
+    text = soup.get_text("")
+    lines = [_WS_RE.sub(" ", ln).strip() for ln in text.splitlines()]
+    return [ln for ln in lines if ln]
+
+
 def plain_summary(raw: str, max_chars: int = MAX_SUMMARY_CHARS) -> str:
-    """Converteix un resum HTML del feed en text pla curt."""
+    """Converteix un resum HTML del feed en text pla curt, conservant línies.
+
+    Els paràgrafs i els elements de llista es mantenen com a línies separades
+    (útil per a resums que són llistes de dates o passos).
+    """
     if not raw:
         return ""
-    text = BeautifulSoup(raw, "html.parser").get_text(" ", strip=True)
-    text = _WS_RE.sub(" ", text).strip()
+    text = "\n".join(_html_to_lines(raw))
     if len(text) > max_chars:
-        text = text[: max_chars - 1].rstrip() + "…"
+        cut = text[: max_chars - 1]
+        # Si podem, tallem en un salt de línia per no deixar mitja línia.
+        last_nl = cut.rfind("\n")
+        if last_nl >= max_chars * 0.5:
+            cut = cut[:last_nl]
+        text = cut.rstrip() + "…"
     return text
 
 
