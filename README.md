@@ -8,16 +8,19 @@ Telegram, perquè les famílies no hagin de revisar la web a mà.
 > Desplegament de referència: **AFA de l'Escola Elisa Badia** (Barberà del
 > Vallès). El programari és genèric i reutilitzable per altres associacions.
 
-> Transparència: vegeu [`docs/transparencia.md`](docs/transparencia.md) per
-> saber què fa el servei, quines dades toca (cap de personal) i qui el sosté.
-> També hi expliquem [per què fem servir Telegram i no WhatsApp](docs/transparencia.md#per-què-telegram-i-no-whatsapp).
+> **Documentació:**
+> - [Com funciona i quines dades toca (transparència)](docs/transparencia.md)
+> - [Per què Telegram i no WhatsApp](docs/transparencia.md#per-què-telegram-i-no-whatsapp)
+> - [Guia: crear el bot i el grup de Telegram](docs/guia-telegram.md)
+> - [Pla de funcionalitats](docs/features-roadmap.md)
+> - [Planificació del projecte (OpenSpec)](openspec/changes/afa-elisabadia-avisos/proposal.md)
 
 ## Característiques
 
 - Sondeig de la web pública del centre: RSS, enllaç de la carta del mes i
   pàgina de calendari.
-- Publicació d'**avís + enllaç** en **català** (sense resums ni IA en la fase
-  actual).
+- Publicació d'**avís + enllaç** (sense resums ni IA en la fase actual), en
+  l'idioma configurat (per defecte, català).
 - **Sondeig adaptatiu**: més freqüent si hi ha novetat, més espaiat en calma.
 - **Un sol grup de Telegram amb topics**; el filtre per curs es fa silenciant
   topics (sense registre de famílies).
@@ -110,9 +113,15 @@ pytest -q
 ```
 src/          codi del servei (fetchers, estat, sortida Telegram, scheduler)
 tests/        proves automatitzades i fixtures
-docs/         transparència, full de ruta i flux de publicació
-openspec/     artefactes de planificació (proposta, disseny, specs, tasques)
+docs/         transparència, guia de Telegram, full de ruta i publicació
+openspec/     planificació del projecte (proposta, disseny, specs, tasques)
 ```
+
+## Col·laborar
+
+El projecte segueix el flux [OpenSpec](openspec/): les propostes i millores es
+plantegen com a *changes* (`openspec/changes/`) amb la seva proposta, specs i
+tasques. Si vols proposar alguna cosa, obre un *issue* o un *pull request*.
 
 ## Llicència
 

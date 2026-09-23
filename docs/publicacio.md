@@ -18,6 +18,16 @@ git remote add origin git@github.com:coop2540/avisos-afa-telegram.git
 git remote add forgejo ssh://git@192.168.0.18:222/jordan/avisos-afa-telegram.git
 ```
 
+## Documentació pública
+
+La documentació del servei (transparència, guia, full de ruta) viu **dins el
+repositori**, així que GitHub la publica com a pàgina web navegable i amb
+historial. URL de referència:
+
+- Transparència: `https://github.com/coop2540/avisos-afa-telegram/blob/main/docs/transparencia.md`
+
+Aquesta és la URL que es pot citar des del canal de Telegram o des de l'AFA.
+
 ## Preparar una versió pública
 
 Abans de fer públic el repositori:

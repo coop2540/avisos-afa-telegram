@@ -43,7 +43,7 @@
 ## 7. Transparència i rollout
 
 - [x] 7.1 Esborrany `docs/transparencia.md` (què fa, fonts, dades, límits, AFA, contacte, fases); verificar seccions mínimes presents i sense secrets
-- [ ] 7.2 Publicar la doc a l'espai públic (Nextcloud/web AFA) amb URL estable; verificar que l'enllaç obre sense login
+- [x] 7.2 Publicar la doc de transparència en un espai públic amb URL estable; s'ha triat GitHub (repo públic) en lloc de Nextcloud; verificat l'enllaç sense login
 - [ ] 7.3 Rollout pas 1–2: canari operador → convidar 1 beta tester; verificar que el beta llegeix i l'operador rep logs/errors
 - [x] 7.4 Preparar llistat de "features" següents (topics extra, docs, fases B/C) per anunciar; verificar document o issue al repo amb el pla escalonat
 - [x] 7.5 Documentar per què s'usa Telegram i no WhatsApp (a `docs/transparencia.md`, amb nota a la guia i al README); verificar secció present
@@ -60,8 +60,8 @@
 - [x] 9.3 Auditoria de secrets: cercar tokens/claus al contingut versionat i comprovar `.gitignore`; verificar que `.env`, `config.yaml` i `state/` no es versionen
 - [x] 9.4 Crear repositori privat a Forgejo i afegir remot `origin` (SSH); verificar amb `git remote -v`
 - [x] 9.5 Primer commit i push a Forgejo; verificar que el repo privat conté el codi i cap secret
-- [ ] 9.6 Revisar com es veu el repo (README, LICENSE, estructura) i ajustar abans de fer-lo públic
-- [ ] 9.7 (Posterior, amb aprovació) Publicar a GitHub públic i afegir remot `github`; verificar accés públic
+- [x] 9.6 Revisar com es veu el repo (README, LICENSE, estructura) i ajustar (índex de docs, secció Col·laborar, phishing del .opencode)
+- [x] 9.7 Publicar a GitHub públic i afegir remot `origin` (GitHub) + mirall `forgejo`; verificat accés públic
 - [x] 9.8 Documentar el flux de publicació (Forgejo→GitHub, remots, preparar versió pública); verificar document present
 
 ## 10. Internacionalització (i18n)
