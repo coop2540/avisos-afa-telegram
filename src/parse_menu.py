@@ -266,7 +266,17 @@ def cell_blocks(words: list[dict]) -> list[list[str]]:
         else:
             blocks[-1].append(text)
         prev_top = top
-    return blocks
+    # Estructura desada: 1r plat | 2n plat (guarnició inclosa) | pa+postre.
+    # Un bloc d'una sola línia al mig (p. ex. «ENCIAM I OLIVES») s'uneix al
+    # bloc anterior; el primer i l'últim (pa/postre) es respecten.
+    merged: list[list[str]] = []
+    for i, block in enumerate(blocks):
+        is_middle = 0 < i < len(blocks) - 1
+        if is_middle and len(block) == 1 and merged:
+            merged[-1].extend(block)
+        else:
+            merged.append(block)
+    return merged
 
 
 def plates_for_date(
