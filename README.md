@@ -9,6 +9,7 @@ web a mà.
 
 > Transparència: vegeu [`docs/transparencia.md`](docs/transparencia.md) per
 > saber què fa el servei, quines dades toca (cap de personal) i qui el sosté.
+> També hi expliquem [per què fem servir Telegram i no WhatsApp](docs/transparencia.md#per-què-telegram-i-no-whatsapp).
 
 ## Característiques
 

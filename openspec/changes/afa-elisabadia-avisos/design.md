@@ -159,3 +159,4 @@ docs/transparencia.md # publicable a Nextcloud
 - Existeix RSS per categoria (`/categoria/infantil/i4/feed/`)? Verificar en aplicar; si sí, simplifica filtres.
 - Freqüències exactes (base/calma/calenta): calibrar amb dades reals de publicació després del canari.
 - Si més endavant hi ha "una nota que és només de I4B", com es etiqueta sense IA: probablement el Curs de la taula de la carta o categories — resoldre en fase B, no bloqueja A.
+- Sortida addicional per **WhatsApp** (comunitat amb subgrups): es contempla com a feature de futur, no d'aquest canvi. Requeriria abstraure una capa de "publicadors" al costat del de Telegram i assumir les limitacions de la WhatsApp Business Platform (de pagament, plantilles aprovades). No afecta l'esquema actual.

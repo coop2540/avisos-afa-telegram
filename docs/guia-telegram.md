@@ -19,6 +19,10 @@ Temps aproximat: 15 minuts.
 > **Model triat:** un **grup amb topics** (fòrum). Un sol enllaç d'entrada, i
 > cada família silencia els topics que no li interessen. Alternativa: un
 > **canal** de només difusió (més limitat: no té topics i no permet fils).
+>
+> **Per què Telegram i no WhatsApp?** Ho expliquem a
+> [`docs/transparencia.md`](transparencia.md#per-què-telegram-i-no-whatsapp)
+> (bàsicament: WhatsApp no permet automatitzar la publicació; Telegram sí).
 
 ---
 

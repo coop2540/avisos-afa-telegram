@@ -46,6 +46,7 @@
 - [ ] 7.2 Publicar la doc a l'espai públic (Nextcloud/web AFA) amb URL estable; verificar que l'enllaç obre sense login
 - [ ] 7.3 Rollout pas 1–2: canari operador → convidar 1 beta tester; verificar que el beta llegeix i l'operador rep logs/errors
 - [x] 7.4 Preparar llistat de "features" següents (topics extra, docs, fases B/C) per anunciar; verificar document o issue al repo amb el pla escalonat
+- [x] 7.5 Documentar per què s'usa Telegram i no WhatsApp (a `docs/transparencia.md`, amb nota a la guia i al README); verificar secció present
 
 ## 8. Verificació integrada (fase A completa)
 

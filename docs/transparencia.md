@@ -14,6 +14,34 @@ Els avisos tenen la forma **avís + enllaç**: un text breu en català i un
 enllaç al document o notícia original. No resumim ni modifiquem el
 contingut del centre.
 
+## Per què Telegram i no WhatsApp?
+
+La decisió no és de gust: ve del fet que el servei ha de **publicar avisos de
+manera automàtica**.
+
+- **WhatsApp no es pot automatitzar de forma oberta.** La seva API oficial
+  (WhatsApp Business Platform) és de pagament, exigeix una empresa verificada i
+  plantilles aprovades, i es cobra per conversa. No hi ha manera gratuïta i
+  senzilla que un programa publiqui avisos; els canals de WhatsApp tampoc no
+  ofereixen API per publicar-hi automàticament.
+- **Telegram sí que ho permet:** té una API de bots **gratuïta i oberta**. El
+  bot publica sol, que és exactament el que necessitem.
+- **Privacitat:** en un grup de WhatsApp tothom veu el número de telèfon de
+  tothom. A Telegram, el bot **no veu el telèfon** dels membres (només un
+  identificador opac), i les famílies no cal que comparteixin el seu número
+  entre elles.
+- **Ordenació:** Telegram té **topics** (fils), així que hi ha un sol lloc
+  d'entrada però cada família silencia el que no li interessa. WhatsApp no té
+  res equivalent.
+- **Control del soroll:** el grup es pot configurar perquè **només els
+  administradors publiquin**; ningú no pot omplir-lo de missatges.
+- **Cost:** gratuït, sense quotes de missatges ni servidors addicionals.
+
+**Contrapartida honesta:** no tothom té Telegram instal·lat. Per això aquest
+servei **complementa** els canals oficials del centre i el WhatsApp de la
+classe; no els substitueix. Qui vulgui els avisos automàtics s'instal·la
+Telegram; qui no, continua com fins ara.
+
 ## D'on surt la informació
 
 Només de fonts **públiques** del centre:

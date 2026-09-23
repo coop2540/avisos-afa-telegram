@@ -30,3 +30,17 @@ previst, pensat per anunciar-se a mesura que cada fase estigui llesta.
 
 > Criteri: cap funcionalitat de la fase C no calcula dates ni inventa dades.
 > Les dades dures sempre vénen del contingut publicat pel centre.
+
+## Futur (sense data)
+
+- [ ] **Sortida addicional per WhatsApp.** Poder publicar els mateixos avisos
+      també en una **comunitat de WhatsApp** (amb subgrups, l'equivalent més
+      proper als *topics* de Telegram). Comporta una capa de «publicadors»
+      intercanviables al costat del de Telegram.
+      - Requereix la **WhatsApp Business Platform**: de pagament, amb empresa
+        verificada i plantilles aprovades (i càrrec per conversa).
+      - Un pont no oficial (WhatsApp Web) **no es recomana**: vulnera les
+        condicions d'ús i és fràgil.
+      - Es valorarà si hi ha prou demanda i si el cost es pot assumir; mentrestant
+        l'opció gratuïta i neta continua sent Telegram.
+- [ ] Altres canals de difusió (correu, web de l'AFA) si el projecte creix.
