@@ -63,10 +63,11 @@ Fonts reals verificades durant l'exploració:
 - **Per què:** zero infra de storage en A; quan hi hagi OCR/filtra carta, el byte ja és a mà i arxivar surt gratis; desacoblament de XTEC només quan aporta.
 - **Descartat:** sempre baixar i servir des de Nextcloud (més peatge ara del que cal); hardcodejar URLs de PDF ( canvien cada mes).
 
-### D5 — Català com a idioma de missatges i de doc
+### D5 — Català per defecte, textos externalitzats
 
-- **Tria:** tots els avísos i el document de transparencia en català; sense cap capa de traducció.
-- **Per què:** la font ja és en català; sense IA en A no hi ha traducció; identitat de l'AFA del centre.
+- **Tria:** l'idioma per defecte és el **català** (alpha, beta i v1), però els textos **no** viuen al codi sinó en catàlegs per idioma (`src/i18n/*.json`); l'idioma es tria a la configuració.
+- **Per què:** la font és en català i el públic inicial és de Catalunya; alhora, el projecte es vol reutilitzable per associacions d'altres comunitats sense reescriure res.
+- **Descartat:** textos incrustats (impossibiliten traduir sense tocar codi); traducció automàtica en temps d'execució (innecessària, i amb IA a la fase C ja hi ha prou risc).
 
 ### D6 — Secrets i desplegament
 
@@ -121,6 +122,13 @@ docs/transparencia.md # publicable a Nextcloud
 - **Tria (versionat al repo):** codi `src/`, tests, `Dockerfile`, `compose.yml`, plantilles `*.example`, `docs/`, artefactes OpenSpec.
 - **Tria (mai versionat):** `.env`, `config.yaml` (conté `chat_id`), `state/`, qualsevol token o clau.
 - **Per què:** el que es publica és el servei; el que és local o secret queda fora. El codi publicat és el que s'executa (auditabilitat).
+
+### D12 — i18n per catàlegs
+
+- **Tria:** textos en fitxers JSON a `src/i18n/` (`ca`, `es`, `en` de sortida); `translate(clau, idioma)` amb retrocés a català i, si no, a la clau; `language` a config (o `LANGUAGE` a l'entorn); variants regionals normalitzades (`es-ES` → `es`).
+- **Per què:** afegir un idioma = afegir un fitxer, sense tocar codi; el codi descobreix idiomes pels catàlegs presents; encaixa amb el repo reutilitzable per altres AFA.
+- **Alternatives:** gettext/`babel` (més maquinària i dependències per a unes poques cadenes); textos incrustats (descartat a D5).
+- **Límit:** la documentació (`docs/`) es manté en català de moment; es podrà traduir més endavant si el projecte es reutilitza.
 
 
 ## Risks / Trade-offs

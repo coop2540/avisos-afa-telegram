@@ -58,6 +58,14 @@ missatges només es registren als logs.
 Tota la configuració és a `config.yaml` (vegeu `config.yaml.example`). Els
 **secrets** (token del bot) van **només** a `.env`; mai al repositori.
 
+## Idioma
+
+Els missatges surten dels catàlegs de `src/i18n/` (`ca.json`, `es.json`,
+`en.json`…). Per defecte el servei parla **català**; es canvia amb `language` a
+`config.yaml` (o la variable `LANGUAGE`). **Afegir un idioma = afegir un fitxer
+JSON**; el codi no canvia. Pensat perquè el projecte serveixi a associacions de
+qualsevol comunitat.
+
 ## Privacitat
 
 El servei **no registra** qui ets, ni quin fill o filla tens, ni el teu

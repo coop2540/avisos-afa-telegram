@@ -13,6 +13,19 @@ def test_load_example_without_secrets():
     assert cfg.poll.hot_minutes == 20
     assert cfg.telegram.chat_id is None
     assert cfg.telegram.token is None
+    assert cfg.language == "ca"  # per defecte català
+
+
+def test_language_env_override(monkeypatch):
+    monkeypatch.setenv("LANGUAGE", "es")
+    cfg = load_config("config.yaml.example")
+    assert cfg.language == "es"
+
+
+def test_language_unknown_falls_back(monkeypatch):
+    monkeypatch.setenv("LANGUAGE", "fr")
+    cfg = load_config("config.yaml.example")
+    assert cfg.language == "ca"
 
 
 def test_env_overrides(monkeypatch):

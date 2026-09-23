@@ -38,6 +38,7 @@
 - [ ] 6.1 Crear grup de proves (temes/topics ON), afegir el bot com a admin, "només admins publiquen"; verificar que un compte no-admin no pot enviar
 - [ ] 6.2 Convidat/invitació controlada (join-request o link revocable) i, en obrir a beta, un segon membre amb lectura només; verificar unir-se i llegir sense poder publicar
 - [ ] 6.3 Noms de topics i fallback general a `config.yaml`; verificar amb un esdeveniment per origen que cau al topic esperat
+- [x] 6.4 Escriure guia pas a pas de creació del bot i el grup a Telegram (reutilitzable per altres AFA) a `docs/guia-telegram.md`; verificar que el document existeix i cobreix bot, grup/topics, chat_id/thread_id, configuració i seguretat
 
 ## 7. Transparència i rollout
 
@@ -56,8 +57,15 @@
 - [x] 9.1 Afegir `LICENSE` (MIT, titular "AFA Escola Elisa Badia") i verificar que el fitxer existeix i nomena el titular
 - [x] 9.2 Escriure `README.md` públic (català): què és, requisits, arrencada (Docker i local), privacitat i enllaç a `docs/transparencia.md`; verificar seccions presents
 - [x] 9.3 Auditoria de secrets: cercar tokens/claus al contingut versionat i comprovar `.gitignore`; verificar que `.env`, `config.yaml` i `state/` no es versionen
-- [ ] 9.4 Crear repositori privat a Forgejo i afegir remot `origin` (SSH); verificar amb `git remote -v`
-- [ ] 9.5 Primer commit i push a Forgejo; verificar que el repo privat conté el codi i cap secret
+- [x] 9.4 Crear repositori privat a Forgejo i afegir remot `origin` (SSH); verificar amb `git remote -v`
+- [x] 9.5 Primer commit i push a Forgejo; verificar que el repo privat conté el codi i cap secret
 - [ ] 9.6 Revisar com es veu el repo (README, LICENSE, estructura) i ajustar abans de fer-lo públic
 - [ ] 9.7 (Posterior, amb aprovació) Publicar a GitHub públic i afegir remot `github`; verificar accés públic
 - [x] 9.8 Documentar el flux de publicació (Forgejo→GitHub, remots, preparar versió pública); verificar document present
+
+## 10. Internacionalització (i18n)
+
+- [x] 10.1 Catàlegs per idioma a `src/i18n/` (`ca`, `es`, `en`) amb càrrega i descobriment automàtic; verificar amb tests que els idiomes disponibles es detecten
+- [x] 10.2 Selecció d'idioma a `config.yaml` (`language`) amb override per entorn (`LANGUAGE`) i normalització de variants regionals; verificar amb tests
+- [x] 10.3 Missatges del servei construïts des del catàleg (per defecte català); verificar amb tests que els textos canvien per idioma i fan retrocés segur
+- [x] 10.4 Documentar com triar i afegir idioma (README i `docs/guia-telegram.md`); verificar seccions presents

@@ -92,7 +92,7 @@ def seed_baseline(cfg: Config, state: State, client: TelegramClient) -> CycleRes
 
     if all_ok and cfg.first_run.publish_welcome:
         res = client.send_message(
-            welcome_message(), thread_id=cfg.telegram.thread_id_for("default")
+            welcome_message(cfg.language), thread_id=cfg.telegram.thread_id_for("default")
         )
         if res.ok:
             result.published += 1
@@ -127,7 +127,7 @@ def run_cycle(
             if state.knows_rss(item.guid):
                 continue
             res = client.send_message(
-                noticia_message(item.title, item.summary, item.link),
+                noticia_message(item.title, item.summary, item.link, cfg.language),
                 thread_id=cfg.telegram.thread_id_for("rss"),
             )
             if res.ok:
@@ -161,7 +161,7 @@ def run_cycle(
                 log.info("Línia base carta fixada: %s", carta_url)
             elif carta_url != state.carta_url:
                 res = client.send_message(
-                    carta_message(carta_url),
+                    carta_message(carta_url, cfg.language),
                     thread_id=cfg.telegram.thread_id_for("carta"),
                 )
                 if res.ok:
@@ -187,7 +187,7 @@ def run_cycle(
             log.info("Línia base calendari fixada: %s", new_hash)
         elif new_hash != state.cal_hash:
             res = client.send_message(
-                calendari_message(cfg.site.calendari_page),
+                calendari_message(cfg.site.calendari_page, cfg.language),
                 thread_id=cfg.telegram.thread_id_for("calendari"),
             )
             if res.ok:

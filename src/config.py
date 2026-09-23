@@ -13,6 +13,7 @@ from typing import Any
 
 import yaml
 
+from .i18n import DEFAULT_LANG, normalize_language
 from .logging_setup import get_logger
 
 log = get_logger(__name__)
@@ -83,6 +84,7 @@ class Config:
     poll: PollConfig
     telegram: TelegramConfig
     first_run: FirstRunConfig
+    language: str = DEFAULT_LANG
     state_path: Path = Path(DEFAULT_STATE_PATH)
     config_path: Path | None = None
 
@@ -185,6 +187,8 @@ def load_config(config_path: str | Path | None = None) -> Config:
         publish_welcome=_as_bool(_section(raw, "first_run").get("publish_welcome"), False)
     )
 
+    language = normalize_language(os.environ.get("LANGUAGE") or raw.get("language"))
+
     state_path = Path(os.environ.get("STATE_PATH") or DEFAULT_STATE_PATH)
 
     cfg = Config(
@@ -194,13 +198,15 @@ def load_config(config_path: str | Path | None = None) -> Config:
         poll=poll,
         telegram=telegram,
         first_run=first_run,
+        language=language,
         state_path=state_path,
         config_path=path,
     )
     log.info(
-        "Configuració carregada de %s (destí=%s, dry_run=%s)",
+        "Configuració carregada de %s (destí=%s, idioma=%s, dry_run=%s)",
         path,
         cfg.telegram.chat_id or "<sense destí>",
+        cfg.language,
         cfg.telegram.dry_run,
     )
     return cfg

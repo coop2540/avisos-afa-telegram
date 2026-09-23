@@ -1,6 +1,7 @@
-"""Plantilles de missatge en català (format avís + enllaç, HTML).
+"""Plantilles de missatge (format avís + enllaç, HTML).
 
-Vegeu specs/telegram-publish: missatges breus, en català, sense IA.
+Els textos surten dels catàlegs d'idioma (`src/i18n/*.json`); aquí només es
+composa el format HTML. Vegeu specs/telegram-publish i specs/service-i18n.
 """
 
 from __future__ import annotations
@@ -9,6 +10,8 @@ import html
 import re
 
 from bs4 import BeautifulSoup
+
+from .i18n import DEFAULT_LANG, translate
 
 MAX_SUMMARY_CHARS = 300
 _WS_RE = re.compile(r"\s+")
@@ -31,35 +34,37 @@ def plain_summary(raw: str, max_chars: int = MAX_SUMMARY_CHARS) -> str:
     return text
 
 
-def carta_message(url: str) -> str:
+def carta_message(url: str, lang: str = DEFAULT_LANG) -> str:
     return (
-        "📚 <b>Carta del mes</b>\n"
-        "Ja està publicada la carta del mes del centre.\n"
-        f'<a href="{_esc(url)}">Obrir la carta</a>'
+        f"📚 <b>{_esc(translate('carta.title', lang))}</b>\n"
+        f"{_esc(translate('carta.body', lang))}\n"
+        f'<a href="{_esc(url)}">{_esc(translate("carta.link", lang))}</a>'
     )
 
 
-def noticia_message(title: str, summary: str, link: str) -> str:
+def noticia_message(title: str, summary: str, link: str, lang: str = DEFAULT_LANG) -> str:
     lines = [f"📣 <b>{_esc(title)}</b>"]
     clean = plain_summary(summary)
     if clean:
         lines.append(_esc(clean))
     if link:
-        lines.append(f'<a href="{_esc(link)}">Llegir més</a>')
+        lines.append(
+            f'<a href="{_esc(link)}">{_esc(translate("noticia.read_more", lang))}</a>'
+        )
     return "\n".join(lines)
 
 
-def calendari_message(url: str) -> str:
+def calendari_message(url: str, lang: str = DEFAULT_LANG) -> str:
     return (
-        "📅 <b>Calendari del curs actualitzat</b>\n"
-        "Hi ha canvis al calendari escolar del centre.\n"
-        f'<a href="{_esc(url)}">Veure el calendari</a>'
+        f"📅 <b>{_esc(translate('calendari.title', lang))}</b>\n"
+        f"{_esc(translate('calendari.body', lang))}\n"
+        f'<a href="{_esc(url)}">{_esc(translate("calendari.link", lang))}</a>'
     )
 
 
-def welcome_message() -> str:
+def welcome_message(lang: str = DEFAULT_LANG) -> str:
     return (
-        "🐝 <b>Servei d'avisos de l'AFA</b>\n"
-        "Aquest canal publica avisos del centre a partir de la seva web pública.\n"
-        "Comença ara."
+        f"🐝 <b>{_esc(translate('welcome.title', lang))}</b>\n"
+        f"{_esc(translate('welcome.body', lang))}\n"
+        f"{_esc(translate('welcome.start', lang))}"
     )

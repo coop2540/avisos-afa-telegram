@@ -1,6 +1,6 @@
 ## Purpose
 
-Publicar avisos automàtics en català a un únic lloc d'entrada de Telegram (grup amb topics), amb format avís+enllaç i sense capacitat d'escriure per part de les famílies, perquè el servei sigui fiable i net per a qui el segueix.
+Publicar avisos automàtics en un únic lloc d'entrada de Telegram (grup amb topics), amb format avís+enllaç i sense capacitat d'escriure per part de les famílies, perquè el servei sigui fiable i net per a qui el segueix. Els missatges surten en l'idioma configurat (per defecte, català); vegeu `service-i18n`.
 
 ## ADDED Requirements
 
@@ -15,12 +15,12 @@ El sistema SHALL publicar tots els avisos en un sol destí de Telegram (grup o c
 - **WHEN** una font té un topic pendent (null a la configuració)
 - **THEN** l'esdeveniment es publica al topic per defecte (general) o queda en cua segons la configuració, sense perdre's en silenci si es configura fallback
 
-### Requirement: Missatges en català i format avís+enllaç
-Els missatges publicats SHALL ser en català i en format breu d'avís amb un enllaç (URL original de la font). En la fase A el sistema MUST NO generar resums ni contingut amb IA.
+### Requirement: Missatges en l'idioma configurat i format avís+enllaç
+Els missatges publicats SHALL ser en l'idioma configurat (per defecte, català; vegeu `service-i18n`) i en format breu d'avís amb un enllaç (URL original de la font). En la fase A el sistema MUST NO generar resums ni contingut amb IA.
 
 #### Scenario: Carta del mes nova
 - **WHEN** es detecta carta nova
-- **THEN** es publica un missatge breu en català amb títol d'avís i enllaç a l'URL original de la carta
+- **THEN** es publica un missatge breu en l'idioma configurat amb títol d'avís i enllaç a l'URL original de la carta
 
 #### Scenario: Notícies
 - **WHEN** es publica un element del RSS filtrat

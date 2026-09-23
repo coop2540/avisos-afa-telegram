@@ -1,6 +1,10 @@
 # Configuració del servei d'avisos AFA — Escola Elisa Badia
 # Copia a `config.yaml` i ajusta. No conté secrets (aquests van a `.env`).
 
+# Idioma dels missatges del servei (catàlegs a `src/i18n/`).
+# Per defecte: ca. Altres: es, en. Afegir-ne un = afegir un fitxer JSON.
+language: ca
+
 site:
   base_url: "https://agora.xtec.cat/escolaelisabadia"
   homepage: "https://agora.xtec.cat/escolaelisabadia/"
