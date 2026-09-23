@@ -1,4 +1,4 @@
-# Servei d'avisos AFA — Escola Elisa Badia
+# avisos-afa-telegram — servei d'avisos per a AFAs
 #
 # Ús:
 #   1. cp config.yaml.example config.yaml   (ajusta chat_id i topics)
@@ -10,8 +10,8 @@
 services:
   avisos:
     build: .
-    image: afa-elisabadia-avisos:local
-    container_name: afa-elisabadia-avisos
+    image: avisos-afa-telegram:local
+    container_name: avisos-afa-telegram
     restart: unless-stopped
     # Executa com l'usuari del host perquè el volum state/ no quedi com a root.
     # Ajusta PUID/PGID al teu usuari (normalment 1000) si cal.

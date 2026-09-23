@@ -1,5 +1,9 @@
 # Transparència del servei d'avisos
 
+> Document del **desplegament de referència** (AFA de l'Escola Elisa Badia).
+> Cada associació que desplegui aquest servei ha d'adaptar aquest document al
+> seu centre. El programari és genèric i reutilitzable.
+
 > Document públic. Explica què fa aquest servei, d'on treu la informació,
 > quines dades toca i qui el sosté. Si trobes res incorrecte, avisa'ns.
 

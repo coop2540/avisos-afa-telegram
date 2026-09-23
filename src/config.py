@@ -33,7 +33,7 @@ class SiteConfig:
     homepage: str
     feed: str
     calendari_page: str
-    user_agent: str = "afa-elisabadia-avisos/0.1"
+    user_agent: str = "avisos-afa-telegram/0.1"
 
 
 @dataclass
@@ -167,7 +167,7 @@ def load_config(config_path: str | Path | None = None) -> Config:
         homepage=str(site_raw["homepage"]),
         feed=str(site_raw["feed"]),
         calendari_page=str(site_raw["calendari_page"]),
-        user_agent=str(site_raw.get("user_agent") or "afa-elisabadia-avisos/0.1"),
+        user_agent=str(site_raw.get("user_agent") or "avisos-afa-telegram/0.1"),
     )
 
     rss_raw = _section(raw, "rss")

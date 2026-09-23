@@ -1,5 +1,6 @@
-# Configuració del servei d'avisos AFA — Escola Elisa Badia
-# Copia a `config.yaml` i ajusta. No conté secrets (aquests van a `.env`).
+# Configuració del servei d'avisos AFA — exemple (desplegament de referència:
+# Escola Elisa Badia). Copia a `config.yaml` i ajusta per al teu centre.
+# No conté secrets (aquests van a `.env`).
 
 # Idioma dels missatges del servei (catàlegs a `src/i18n/`).
 # Per defecte: ca. Altres: es, en. Afegir-ne un = afegir un fitxer JSON.
@@ -13,7 +14,7 @@ site:
   homepage: "https://agora.xtec.cat/escolaelisabadia/"
   feed: "https://agora.xtec.cat/escolaelisabadia/feed/"
   calendari_page: "https://agora.xtec.cat/escolaelisabadia/lescola/calendari-del-curs/"
-  user_agent: "afa-elisabadia-avisos/0.1 (servei d'avisos AFA; contacte: AFA)"
+  user_agent: "avisos-afa-telegram/0.1 (servei d'avisos AFA; contacte: AFA)"
 
 rss:
   # Categories del blog que es publiquen (comparació sense distingir majúscules).

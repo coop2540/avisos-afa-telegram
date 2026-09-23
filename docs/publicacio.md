@@ -1,21 +1,21 @@
 # Flux de publicació del repositori
 
-El projecte es publica en dues etapes: primer **privat** a Forgejo (instància
-pròpia) per revisar com queda, i després **públic** a GitHub.
+El projecte es publica a **GitHub** (públic). Opcionalment, es pot mantenir un
+**mirall privat** a Forgejo (instància pròpia) mentre es treballa.
 
 ## Remots
 
 | Remot | Destinació | Visibilitat | Ús |
 |-------|-----------|-------------|-----|
-| `origin` | Forgejo propi (`ssh://git@192.168.0.18:222/jordan/afa-elisabadia-avisos.git`) | Privat | Enviament habitual |
-| `github` | GitHub (`git@github.com:<org>/afa-elisabadia-avisos.git`) | Públic | Publicació (posterior) |
+| `origin` | GitHub (`git@github.com:coop2540/avisos-afa-telegram.git`) | Públic | Enviament habitual |
+| `forgejo` | Forgejo propi (`ssh://git@192.168.0.18:222/jordan/avisos-afa-telegram.git`) | Privat | Mirall privat (opcional) |
 
 Afegir els remots:
 
 ```bash
-git remote add origin ssh://git@192.168.0.18:222/jordan/afa-elisabadia-avisos.git
-# Quan toqui publicar:
-git remote add github git@github.com:<org>/afa-elisabadia-avisos.git
+git remote add origin git@github.com:coop2540/avisos-afa-telegram.git
+# Mirall privat (opcional):
+git remote add forgejo ssh://git@192.168.0.18:222/jordan/avisos-afa-telegram.git
 ```
 
 ## Preparar una versió pública
@@ -40,7 +40,7 @@ Abans de fer públic el repositori:
 > Si mai es filtrés un secret, **rotar-lo** (no n'hi ha prou d'esborrar el
 > fitxer: queda a l'historial).
 
-## Primer enviament a Forgejo
+## Primer enviament
 
 ```bash
 git add -A
@@ -48,5 +48,5 @@ git commit -m "Primera versió del servei d'avisos (fase A)"
 git push -u origin main
 ```
 
-El repositori de Forgejo s'ha de crear **privat** (via API o interfície web)
-abans del push.
+El repositori de GitHub s'ha de crear **buit** (sense README ni .gitignore) i
+públic abans del push.

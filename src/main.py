@@ -331,7 +331,7 @@ def run_forever(cfg: Config) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Servei d'avisos AFA Escola Elisa Badia")
+    parser = argparse.ArgumentParser(description="avisos-afa-telegram — servei d'avisos per a AFAs")
     parser.add_argument("--config", default=None, help="Ruta a config.yaml")
     parser.add_argument(
         "--once",

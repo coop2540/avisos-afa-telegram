@@ -1,8 +1,7 @@
-"""Servei d'avisos de l'AFA — Escola Elisa Badia.
+"""avisos-afa-telegram — servei d'avisos per a AFAs (associacions de famílies).
 
-Pipeline de fase A: sondeja la web pública del centre i publica avisos
-(avís + enllaç) en un grup de Telegram amb topics. Vegeu
-`openspec/changes/afa-elisabadia-avisos/` per al disseny complet.
+Sondeja la web pública d'un centre i publica avisos (avís + enllaç) en un grup
+de Telegram. Vegeu `openspec/changes/afa-elisabadia-avisos/` per al disseny.
 """
 
 __version__ = "0.1.0"

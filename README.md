@@ -1,11 +1,12 @@
-# afa-elisabadia-avisos
+# avisos-afa-telegram
 
-Servei d'avisos de l'**AFA de l'Escola Elisa Badia** (Barberà del Vallès).
+Servei d'avisos per a **AFAs** (associacions de famílies d'alumnat): recull el
+contingut que el centre ja publica a la seva web pública (carta mensual,
+calendari i notícies) i el reenvia com a **avisos + enllaç** a un grup de
+Telegram, perquè les famílies no hagin de revisar la web a mà.
 
-Recull el contingut que el centre ja publica a la seva web pública (carta
-mensual, calendari del curs i notícies) i el reenvia com a **avisos + enllaç**
-a un grup de Telegram amb topics, perquè les famílies no hagin de revisar la
-web a mà.
+> Desplegament de referència: **AFA de l'Escola Elisa Badia** (Barberà del
+> Vallès). El programari és genèric i reutilitzable per altres associacions.
 
 > Transparència: vegeu [`docs/transparencia.md`](docs/transparencia.md) per
 > saber què fa el servei, quines dades toca (cap de personal) i qui el sosté.
@@ -115,4 +116,4 @@ openspec/     artefactes de planificació (proposta, disseny, specs, tasques)
 
 ## Llicència
 
-[MIT](LICENSE) © AFA Escola Elisa Badia.
+[MIT](LICENSE) © SomTIC Cooperativa.
