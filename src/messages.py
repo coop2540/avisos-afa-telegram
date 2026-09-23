@@ -132,14 +132,23 @@ def agenda_message(events, week_start, week_end, carta_url: str | None, lang: st
 
 
 def menu_dema_message(plates, target, variant_id: str, lang: str = DEFAULT_LANG) -> str:
-    """Missatge diari «Demà dinem …» amb la data i els plats (sense enllaç)."""
+    """Missatge diari «Demà dinem …» amb la data i els plats (sense enllaç).
+
+    `plates` és una llista de blocs (cada bloc, una llista de línies); els
+    blocs se separen amb una línia en blanc per llegir-los com al PDF.
+    """
     title = translate("menu.title", lang, data=target.strftime("%d/%m"))
     lines = [f"🍽️ <b>{_esc(title)}</b>"]
     label = translate(f"menu.variant.{variant_id}", lang)
     if label and label != f"menu.variant.{variant_id}":
         lines.append(f"<i>{_esc(label)}</i>")
-    for plate in plates:
-        lines.append(_esc(plate))
+
+    if plates and isinstance(plates[0], str):
+        plates = [list(plates)]  # compatibilitat amb una llista de línies planes
+    for i, block in enumerate(plates):
+        if i:
+            lines.append("")
+        lines.extend(_esc(line) for line in block)
     return "\n".join(lines)
 
 

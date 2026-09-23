@@ -38,6 +38,7 @@ _DAY_ABBRS = {
 _WS_RE = re.compile(r"\s+")
 _DATE_ROW_TOL = 6  # px: agrupació de dates d'una mateixa fila
 _LINE_TOL = 5  # px: agrupació de paraules d'una mateixa línia de cel·la
+_BLOCK_TOL = 14  # px: salt vertical que separa blocs dins una cel·la
 
 
 @dataclass
@@ -232,6 +233,42 @@ def words_to_lines(words: list[dict]) -> list[str]:
     return result
 
 
+def _line_entries(words: list[dict]) -> list[tuple[float, str]]:
+    """Retorna (top, text) de cada línia, ordenades verticalment."""
+    lines: list[list[dict]] = []
+    for w in sorted(words, key=lambda w: (w["top"], w["x0"])):
+        if lines and abs(w["top"] - lines[-1][-1]["top"]) <= _LINE_TOL:
+            lines[-1].append(w)
+        else:
+            lines.append([w])
+    entries: list[tuple[float, str]] = []
+    for line in lines:
+        top = min(w["top"] for w in line)
+        text = words_to_lines(line)[0] if line else ""
+        if text:
+            entries.append((top, text))
+    return entries
+
+
+def cell_blocks(words: list[dict]) -> list[list[str]]:
+    """Agrupa les línies de la cel·la en blocs pel salt vertical.
+
+    Dins un bloc (p. ex. el primer plat en dues línies) el salt és petit
+    (~9-10px); entre blocs (primer/segons/pa/postre) és gran (~19px). No
+    s'inventen categories: només se separen els grups.
+    """
+    entries = _line_entries(words)
+    blocks: list[list[str]] = []
+    prev_top: float | None = None
+    for top, text in entries:
+        if prev_top is None or (top - prev_top) > _BLOCK_TOL:
+            blocks.append([text])
+        else:
+            blocks[-1].append(text)
+        prev_top = top
+    return blocks
+
+
 def plates_for_date(
     words: list[dict],
     target: date,
@@ -245,8 +282,8 @@ def plates_for_date(
     cell = cell_words(grid, target)
     if cell is None:
         return None
-    lines = words_to_lines(cell)
-    return lines or None
+    blocks = cell_blocks(cell)
+    return blocks or None
 
 
 def parse_menu_pdf(

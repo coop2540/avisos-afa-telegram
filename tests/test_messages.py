@@ -141,6 +141,18 @@ def test_menu_dema_message_escapes_html():
     assert "&lt;script&gt;" in msg
 
 
+def test_menu_dema_message_separates_blocks_with_blank_line():
+    msg = menu_dema_message(
+        [["MONGETA TENDRA I", "PATATA"], ["GALL DINDI ESTOFAT"]],
+        date(2026, 9, 24),
+        "basal",
+    )
+    lines = msg.split("\n")
+    i = lines.index("PATATA")
+    assert lines[i + 1] == ""  # línia en blanc entre blocs
+    assert lines[i + 2] == "GALL DINDI ESTOFAT"
+
+
 def test_menu_pin_message_has_link():
     msg = menu_pin_message("https://x.test/Basal-escolar_merged.pdf")
     assert "Menú del mes (PDF)" in msg

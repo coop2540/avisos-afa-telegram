@@ -4,6 +4,8 @@ from datetime import date
 
 from src.parse_menu import (
     build_grid,
+    cell_blocks,
+    cell_words,
     parse_menu_pdf,
     plates_for_date,
     words_to_lines,
@@ -42,9 +44,10 @@ def test_grid_columns_and_rows():
 
 def test_cell_line_order():
     words = _load_words(0)
-    lines = plates_for_date(words, date(2026, 9, 23), source_url=URL)
-    assert lines is not None
-    assert any("CREMA DE CARBASSA" in ln for ln in lines)
+    blocks = plates_for_date(words, date(2026, 9, 23), source_url=URL)
+    assert blocks is not None
+    flat = [ln for block in blocks for ln in block]
+    assert any("CREMA DE CARBASSA" in ln for ln in flat)
 
 
 def test_erratum_24_printed_as_25_resolves_by_column():
@@ -53,8 +56,8 @@ def test_erratum_24_printed_as_25_resolves_by_column():
     thursday = plates_for_date(words, date(2026, 9, 24), source_url=URL)
     friday = plates_for_date(words, date(2026, 9, 25), source_url=URL)
     assert thursday is not None and friday is not None
-    thursday_text = " ".join(thursday)
-    friday_text = " ".join(friday)
+    thursday_text = " ".join(ln for b in thursday for ln in b)
+    friday_text = " ".join(ln for b in friday for ln in b)
     # El dijous ha de contenir el plat del dia 24, no el de divendres 25.
     assert "GALL DINDI" in thursday_text
     assert "OUS AL FORN" in friday_text
@@ -96,9 +99,24 @@ def test_words_to_lines_groups_by_top():
 def test_glued_letters_are_joined_sense_porc_page():
     """La pagina 2 parte algunas palabras letra a letra; s'han d'unir."""
     words = _load_words(1)
-    lines = plates_for_date(words, date(2026, 9, 24), source_url=URL)
-    assert lines is not None
-    joined = " ".join(lines)
+    blocks = plates_for_date(words, date(2026, 9, 24), source_url=URL)
+    assert blocks is not None
+    joined = " ".join(ln for b in blocks for ln in b)
     assert "PA BLANC" in joined
     assert "FRUITA" in joined
     assert "P A B L" not in joined
+
+
+def test_cell_blocks_groups_by_vertical_gap():
+    """Les línies dins un bloc s'aproximen; entre blocs salta >14px."""
+    words = _load_words(0)
+    g = build_grid(words, source_url=URL)
+    cell = cell_words(g, date(2026, 9, 24))
+    assert cell is not None
+    blocks = cell_blocks(cell)
+    assert isinstance(blocks, list)
+    assert all(isinstance(b, list) for b in blocks)
+    assert len(blocks) >= 2
+    first = " ".join(blocks[0])
+    assert "MONGETA TENDRA I" in first
+    assert "PATATA" in first
