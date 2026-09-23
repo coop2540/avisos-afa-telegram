@@ -12,7 +12,7 @@ Telegram, perquè les famílies no hagin de revisar la web a mà.
 > - [Com funciona i quines dades toca (transparència)](docs/transparencia.md)
 > - [Per què Telegram i no WhatsApp](docs/transparencia.md#per-què-telegram-i-no-whatsapp)
 > - [Guia: crear el bot i el grup de Telegram](docs/guia-telegram.md)
-> - [Pla de funcionalitats](docs/features-roadmap.md)
+> - [Visió i evolució del projecte](docs/features-roadmap.md)
 > - [Planificació del projecte (OpenSpec)](openspec/changes/afa-elisabadia-avisos/proposal.md)
 
 ## Característiques
