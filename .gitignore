@@ -13,3 +13,9 @@ venv/
 /*.png
 /*.jpg
 /*.jpeg
+
+# Tooling local d'IA (no forma part del producte)
+.opencode/
+
+# Reportes puntuals d'anàlisi
+REVIEW.md
