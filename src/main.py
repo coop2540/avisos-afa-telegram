@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import threading
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -11,6 +12,7 @@ from zoneinfo import ZoneInfo
 from dotenv import load_dotenv
 
 from .agenda import events_in_week, filter_events, should_post_weekly, week_bounds
+from .approval import ApprovalService
 from .config import Config, load_config
 from .fetch_calendari import fetch_calendari, hash_content
 from .fetch_carta import fetch_carta_url
@@ -306,6 +308,17 @@ def run_forever(cfg: Config) -> None:
     """Bucle principal amb sondeig adaptatiu."""
     cfg.validate_for_run()
     state = State.load(cfg.state_path)
+
+    approval_thread = None
+    approval_service = None
+    if cfg.telegram.approval.enabled and not cfg.telegram.dry_run:
+        approval_service = ApprovalService(cfg, state)
+        approval_thread = threading.Thread(
+            target=approval_service.run_forever, name="approval-polling", daemon=True
+        )
+        approval_thread.start()
+        log.info("Servei d'aprovació de membres en marxa (fil paral·lel).")
+
     with TelegramClient(
         cfg.telegram.token, cfg.telegram.chat_id, dry_run=cfg.telegram.dry_run
     ) as client:

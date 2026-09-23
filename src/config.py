@@ -58,11 +58,39 @@ class PollConfig:
 
 
 @dataclass
+class AutoRejectConfig:
+    enabled: bool = False
+    block_empty_name: bool = True
+    block_spam_bio: bool = True
+
+
+@dataclass
+class ApprovalConfig:
+    enabled: bool = False
+    receive: str = "polling"  # polling | webhook
+    webhook_url: str | None = None
+    webhook_secret: str | None = None
+    auto_reject: AutoRejectConfig = field(default_factory=AutoRejectConfig)
+
+    def validate(self) -> None:
+        if self.enabled and self.receive not in {"polling", "webhook"}:
+            raise ConfigError(
+                f"telegram.approval.receive ha de ser 'polling' o 'webhook' (és '{self.receive}')."
+            )
+        if self.enabled and self.receive == "webhook" and not self.webhook_url:
+            raise ConfigError(
+                "telegram.approval.receive=webhook requereix telegram.approval.webhook.url."
+            )
+
+
+@dataclass
 class TelegramConfig:
     chat_id: str | None = None
     token: str | None = None
     dry_run: bool = False
     topics: dict[str, int | None] = field(default_factory=dict)
+    admin_chat_id: str | None = None
+    approval: ApprovalConfig = field(default_factory=ApprovalConfig)
 
     def thread_id_for(self, source: str) -> int | None:
         """Retorna el message_thread_id per a un origen, amb fallback a `default`."""
@@ -199,15 +227,37 @@ def load_config(config_path: str | Path | None = None) -> Config:
     topics_raw = tg_raw.get("topics") or {}
     if not isinstance(topics_raw, dict):
         raise ConfigError("'telegram.topics' ha de ser un mapa origen→thread_id.")
+
+    approval_raw = _section(tg_raw, "approval")
+    ar_raw = _section(approval_raw, "auto_reject")
+    webhook_raw = _section(approval_raw, "webhook")
+    approval = ApprovalConfig(
+        enabled=_as_bool(approval_raw.get("enabled"), False),
+        receive=str(approval_raw.get("receive") or "polling").strip().lower(),
+        webhook_url=(str(webhook_raw["url"]) if webhook_raw.get("url") else None),
+        webhook_secret=os.environ.get("TELEGRAM_WEBHOOK_SECRET") or None,
+        auto_reject=AutoRejectConfig(
+            enabled=_as_bool(ar_raw.get("enabled"), False),
+            block_empty_name=_as_bool(ar_raw.get("block_empty_name"), True),
+            block_spam_bio=_as_bool(ar_raw.get("block_spam_bio"), True),
+        ),
+    )
+    approval.validate()
+
     telegram = TelegramConfig(
         chat_id=str(tg_raw["chat_id"]) if tg_raw.get("chat_id") else None,
         token=os.environ.get("TELEGRAM_BOT_TOKEN") or None,
         dry_run=_as_bool(os.environ.get("DRY_RUN"), default=False),
         topics={str(k): (int(v) if v is not None else None) for k, v in topics_raw.items()},
+        admin_chat_id=(str(tg_raw["admin_chat_id"]) if tg_raw.get("admin_chat_id") else None),
+        approval=approval,
     )
     env_chat_id = os.environ.get("TELEGRAM_CHAT_ID")
     if env_chat_id:
         telegram.chat_id = env_chat_id
+    env_admin = os.environ.get("TELEGRAM_ADMIN_CHAT_ID")
+    if env_admin:
+        telegram.admin_chat_id = env_admin
 
     first_run = FirstRunConfig(
         publish_welcome=_as_bool(_section(raw, "first_run").get("publish_welcome"), False)

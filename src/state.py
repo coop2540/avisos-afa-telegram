@@ -34,6 +34,7 @@ class State:
     intent_errors: dict[str, int] = field(default_factory=dict)
     baseline_done: bool = False
     last_weekly_post: str | None = None
+    join_requests: dict[str, dict[str, str]] = field(default_factory=dict)
     version: int = STATE_VERSION
 
     # --- càrrega / guardat -------------------------------------------------
@@ -60,6 +61,7 @@ class State:
             intent_errors=dict(data.get("intent_errors") or {}),
             baseline_done=bool(data.get("baseline_done", False)),
             last_weekly_post=data.get("last_weekly_post"),
+            join_requests=dict(data.get("join_requests") or {}),
             version=int(data.get("version", STATE_VERSION)),
         )
 
@@ -76,6 +78,7 @@ class State:
             "intent_errors": self.intent_errors,
             "baseline_done": self.baseline_done,
             "last_weekly_post": self.last_weekly_post,
+            "join_requests": self.join_requests,
         }
         fd, tmp_name = tempfile.mkstemp(dir=str(p.parent), prefix=".state-", suffix=".tmp")
         try:
@@ -116,3 +119,14 @@ class State:
     def clear_error(self, source: str) -> None:
         if source in self.intent_errors:
             self.intent_errors.pop(source, None)
+
+    # --- sol·licituds d'unió ----------------------------------------------
+    def join_status(self, user_id: str | int) -> str | None:
+        entry = self.join_requests.get(str(user_id))
+        return entry.get("status") if entry else None
+
+    def remember_join(self, user_id: str | int, status: str) -> None:
+        self.join_requests[str(user_id)] = {"status": status, "ts": now_iso()}
+
+    def is_join_notified(self, user_id: str | int) -> bool:
+        return self.join_status(user_id) in {"notified", "approved", "declined"}

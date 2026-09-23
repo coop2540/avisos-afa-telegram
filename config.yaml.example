@@ -47,6 +47,19 @@ poll:
 telegram:
   # Identificador del grup/canal de destí (NO és secret).
   chat_id: null
+  # Xat privat de l'administrador: rep els avisos de sol·licituds d'unió.
+  admin_chat_id: null
+  # Aprovació de membres (semi-automàtica).
+  approval:
+    enabled: false
+    receive: polling        # polling | webhook
+    webhook:
+      url: null             # només si receive=webhook (cal HTTPS públic)
+      # El secret del webhook es posa a .env: TELEGRAM_WEBHOOK_SECRET
+    auto_reject:            # opt-in; NOMÉS pot rebutjar, mai aprovar sol
+      enabled: false
+      block_empty_name: true
+      block_spam_bio: true
   # Topics (message_thread_id) per origen. null = topic general / sense topic.
   topics:
     default: null

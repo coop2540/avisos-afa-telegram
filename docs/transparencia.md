@@ -74,8 +74,14 @@ teu telèfon. No hi ha base de dades de famílies.
 ## Què guardem
 
 Només un petit **estat tècnic** per no repetir avisos: la llista
-d'identificadors de notícies ja publicades, l'enllaç de la carta vigent i
-una empremta del calendari. No conté cap dada personal.
+d'identificadors de notícies ja publicades, l'enllaç de la carta vigent i una
+empremta del calendari. No conté cap dada personal.
+
+Quan algú **demana unir-se al grup** (sol·licitud d'unió), el servei veu les
+dades que Telegram proporciona del sol·licitant (nom, usuari, identificador i
+bio, si en té) per poder **avisar l'administrador** i que aquest decideixi. Del
+resultat només es desa un **estat mínim** (identificador, decisió i moment);
+no es fa cap perfilat ni es comparteix amb ningú.
 
 No hi ha servidors de tercers recollint estadístiques d'aquest servei.
 

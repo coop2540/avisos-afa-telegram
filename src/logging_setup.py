@@ -38,6 +38,10 @@ def setup_logging(level: str | None = None) -> None:
     root.setLevel(getattr(logging, resolved, logging.INFO))
     root.handlers.clear()
     root.addHandler(handler)
+    # httpx/httpcore inclouen la URL completa (amb el token del bot) als logs.
+    # Els pugem a WARNING i desactivem la propagació del seu logger.
+    for noisy in ("httpx", "httpcore"):
+        logging.getLogger(noisy).setLevel(logging.WARNING)
     _configured = True
 
 
