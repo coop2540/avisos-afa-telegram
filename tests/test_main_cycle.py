@@ -6,6 +6,8 @@ duplicats. També cobreix la tolerància a errors d'una font.
 """
 
 import src.main as main_mod
+from datetime import date, datetime, timezone
+
 from src.config import (
     CartaConfig,
     Config,
@@ -18,10 +20,11 @@ from src.config import (
 from src.fetch_calendari import CalendariContent, hash_content
 from src.fetch_rss import RssItem
 from src.http_util import FetchError
+from src.parse_carta import CartaData, CartaEvent
 from src.state import State
 from src.telegram_out import SendResult
 
-TOPICS = {"default": 1, "rss": 11, "carta": 12, "calendari": 13}
+TOPICS = {"default": 1, "rss": 11, "carta": 12, "calendari": 13, "agenda": 14}
 
 
 class FakeClient:
@@ -193,3 +196,84 @@ def test_baseline_incomplete_retries_next_cycle(monkeypatch, tmp_path):
     assert result.baseline is True
     assert state.baseline_done is False  # es reintentarà
     assert any(e.startswith("rss:") for e in result.errors)
+
+
+def _fake_carta(monkeypatch, events):
+    monkeypatch.setattr(
+        main_mod,
+        "load_carta",
+        lambda url, user_agent: CartaData(month=9, year=2026, events=list(events)),
+    )
+
+
+def test_carta_filtrada_on_new_carta(monkeypatch, tmp_path):
+    cfg = make_cfg(tmp_path)
+    cfg.agenda.enabled = True
+    cfg.agenda.carta_filtrada = True
+    cfg.agenda.cursos = ["I4"]
+    state = State(baseline_done=True, carta_url="c1", cal_hash=hash_content("base"))
+    patch_sources(monkeypatch, items=[], carta="c2", cal="base")
+    _fake_carta(monkeypatch, [CartaEvent(date(2026, 9, 15), "I4", "Reunió de famílies (15h)")])
+
+    client = FakeClient()
+    result = main_mod.run_cycle(cfg, state, client)
+
+    assert result.published == 1
+    text, thread = client.sent[0]
+    assert thread == TOPICS["carta"]
+    assert "Reunió de famílies" in text
+    assert "15/09" in text
+
+
+def test_carta_without_class_events_falls_back_to_link(monkeypatch, tmp_path):
+    cfg = make_cfg(tmp_path)
+    cfg.agenda.enabled = True
+    cfg.agenda.carta_filtrada = True
+    cfg.agenda.cursos = ["I4"]
+    state = State(baseline_done=True, carta_url="c1", cal_hash=hash_content("base"))
+    patch_sources(monkeypatch, items=[], carta="c2", cal="base")
+    _fake_carta(monkeypatch, [CartaEvent(date(2026, 9, 16), "3r", "Reunió de 3r")])
+
+    client = FakeClient()
+    main_mod.run_cycle(cfg, state, client)
+    text, _thread = client.sent[0]
+    assert "Carta del mes" in text  # avís+enllaç, sense llista buida
+    assert "3r" not in text
+
+
+def test_weekly_agenda_published_once(monkeypatch, tmp_path):
+    cfg = make_cfg(tmp_path)
+    cfg.agenda.enabled = True
+    cfg.agenda.weekly_enabled = True
+    cfg.agenda.weekly_day = 1
+    cfg.agenda.weekly_time = (8, 0)
+    cfg.agenda.cursos = ["I4"]
+    cfg.timezone = "UTC"
+    state = State(baseline_done=True, carta_url="c1", cal_hash=hash_content("base"))
+    patch_sources(monkeypatch, items=[], carta="c1", cal="base")
+    _fake_carta(monkeypatch, [CartaEvent(date(2026, 9, 23), "I4", "Reunió de famílies")])
+
+    client = FakeClient()
+    now = datetime(2026, 9, 23, 9, 0, tzinfo=timezone.utc)  # dimecres; slot dilluns 08:00 passat
+    result = main_mod.run_cycle(cfg, state, client, now=now)
+
+    assert result.published == 1
+    text, thread = client.sent[0]
+    assert thread == TOPICS["agenda"]
+    assert "Agenda de la setmana" in text
+    assert "23/09 · Reunió de famílies" in text
+    assert state.last_weekly_post is not None
+
+    # Segona execució: no duplica
+    result2 = main_mod.run_cycle(cfg, state, client, now=now)
+    assert result2.published == 0
+
+
+def test_weekly_agenda_disabled_does_nothing(monkeypatch, tmp_path):
+    cfg = make_cfg(tmp_path)
+    cfg.agenda.enabled = False
+    state = State(baseline_done=True, carta_url="c1", cal_hash=hash_content("base"))
+    patch_sources(monkeypatch, items=[], carta="c1", cal="base")
+    now = datetime(2026, 9, 23, 9, 0, tzinfo=timezone.utc)
+    result = main_mod.run_cycle(cfg, state, FakeClient(), now=now)
+    assert result.published == 0

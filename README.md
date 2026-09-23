@@ -20,6 +20,9 @@ web a mà.
 - **Sondeig adaptatiu**: més freqüent si hi ha novetat, més espaiat en calma.
 - **Un sol grup de Telegram amb topics**; el filtre per curs es fa silenciant
   topics (sense registre de famílies).
+- **Agenda de la carta**: extreu la taula d'activitats (Dia | Curs | Activitat)
+  del PDF i publica la selecció del curs en sortir carta nova, més una agenda
+  setmanal programada.
 - **Només els administradors publiquen**; accés per invitació.
 - Estat de deduplicació persistent per no repetir avisos entre reinicis.
 
@@ -66,6 +69,27 @@ Els missatges surten dels catàlegs de `src/i18n/` (`ca.json`, `es.json`,
 `config.yaml` (o la variable `LANGUAGE`). **Afegir un idioma = afegir un fitxer
 JSON**; el codi no canvia. Pensat perquè el projecte serveixi a associacions de
 qualsevol comunitat.
+
+## Agenda de la carta
+
+A partir de la taula d'activitats de la carta (Dia | Curs | Activitat):
+
+- En detectar **carta nova**, publica la **selecció d'activitats del curs**
+  (més enllaç al PDF complet).
+- Publica una **agenda setmanal** el dia i hora configurats.
+
+Es configura a `config.yaml`:
+
+```yaml
+agenda:
+  enabled: true
+  cursos: ["I4", "Tothom", "Famílies"]   # "I4" inclou "I4B"
+  carta_filtrada: true
+  setmanal:
+    enabled: true
+    dia: 1        # 1=dilluns … 7=diumenge
+    hora: "08:00"
+```
 
 ## Privacitat
 

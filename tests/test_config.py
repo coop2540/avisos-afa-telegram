@@ -28,6 +28,34 @@ def test_language_unknown_falls_back(monkeypatch):
     assert cfg.language == "ca"
 
 
+def test_agenda_config_from_example():
+    cfg = load_config("config.yaml.example")
+    assert cfg.agenda.enabled is True
+    assert cfg.agenda.cursos == ["I4", "Tothom", "Famílies"]
+    assert cfg.agenda.carta_filtrada is True
+    assert cfg.agenda.weekly_enabled is True
+    assert cfg.agenda.weekly_day == 1
+    assert cfg.agenda.weekly_time == (8, 0)
+
+
+def test_timezone_default():
+    cfg = load_config("config.yaml.example")
+    assert cfg.timezone == "Europe/Madrid"
+
+
+def test_agenda_invalid_day_falls_back(tmp_path):
+    p = tmp_path / "config.yaml"
+    p.write_text(
+        "site:\n  base_url: 'https://x.test'\n  homepage: 'https://x.test/'\n"
+        "  feed: 'https://x.test/feed/'\n  calendari_page: 'https://x.test/cal/'\n"
+        "agenda:\n  enabled: true\n  setmanal:\n    enabled: true\n    dia: 9\n    hora: '25:99'\n",
+        encoding="utf-8",
+    )
+    cfg = load_config(p)
+    assert cfg.agenda.weekly_day == 1
+    assert cfg.agenda.weekly_time == (8, 0)
+
+
 def test_env_overrides(monkeypatch):
     monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "tok-123")
     monkeypatch.setenv("TELEGRAM_CHAT_ID", "-100999")

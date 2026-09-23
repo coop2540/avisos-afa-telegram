@@ -6,21 +6,84 @@ import argparse
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 from dotenv import load_dotenv
 
+from .agenda import events_in_week, filter_events, should_post_weekly, week_bounds
 from .config import Config, load_config
 from .fetch_calendari import fetch_calendari, hash_content
 from .fetch_carta import fetch_carta_url
 from .fetch_rss import fetch_rss
 from .http_util import FetchError
 from .logging_setup import get_logger, setup_logging
-from .messages import calendari_message, carta_message, noticia_message, welcome_message
+from .messages import (
+    agenda_message,
+    calendari_message,
+    carta_filtrada_message,
+    carta_message,
+    noticia_message,
+    welcome_message,
+)
+from .parse_carta import load_carta
 from .scheduler import next_interval_minutes
 from .state import State
 from .telegram_out import TelegramClient
 
 log = get_logger(__name__)
+
+
+def _local_tz(cfg: Config):
+    try:
+        return ZoneInfo(cfg.timezone)
+    except Exception:
+        log.warning("Zona horària '%s' no vàlida; s'usa UTC.", cfg.timezone)
+        return timezone.utc
+
+
+def _carta_text(cfg: Config, carta_url: str) -> str:
+    """Missatge de carta: selecció del curs si l'agenda ho permet, si no enllaç."""
+    if cfg.agenda.enabled and cfg.agenda.carta_filtrada:
+        try:
+            carta = load_carta(carta_url, user_agent=cfg.site.user_agent)
+            events = filter_events(carta.events, cfg.agenda.cursos)
+            if events:
+                return carta_filtrada_message(events, carta_url, cfg.language)
+            log.info("Carta sense activitats del curs; s'envia només l'enllaç.")
+        except Exception as exc:  # xarxa o parseig del PDF
+            log.error("No s'ha pogut processar la carta per a l'agenda: %s", exc)
+    return carta_message(carta_url, cfg.language)
+
+
+def maybe_publish_weekly(cfg: Config, state: State, client: TelegramClient, now: datetime) -> int:
+    """Publica l'agenda setmanal si toca. Retorna 1 si s'ha publicat, 0 si no."""
+    if not (cfg.agenda.enabled and cfg.agenda.weekly_enabled):
+        return 0
+    local = now.astimezone(_local_tz(cfg))
+    if not should_post_weekly(local, cfg.agenda, state.last_weekly_post):
+        return 0
+    carta_url = state.carta_url
+    if not carta_url:
+        return 0
+    try:
+        carta = load_carta(carta_url, user_agent=cfg.site.user_agent)
+    except Exception as exc:
+        log.error("Agenda: no s'ha pogut llegir la carta (%s); es reintentarà.", exc)
+        return 0
+    events = events_in_week(filter_events(carta.events, cfg.agenda.cursos), local.date())
+    if not events:
+        log.info("Agenda setmanal: cap acte aquesta setmana; s'omet.")
+        state.last_weekly_post = local.isoformat()
+        return 0
+    start, end = week_bounds(local.date())
+    text = agenda_message(events, start, end, carta_url, cfg.language)
+    res = client.send_message(text, thread_id=cfg.telegram.thread_id_for("agenda"))
+    if res.ok:
+        state.last_weekly_post = local.isoformat()
+        log.info("Publicada agenda setmanal (%d actes).", len(events))
+        return 1
+    log.error("No s'ha pogut publicar l'agenda setmanal; es reintentarà.")
+    return 0
 
 
 @dataclass
@@ -163,7 +226,7 @@ def run_cycle(
                 log.info("Línia base carta fixada: %s", carta_url)
             elif carta_url != state.carta_url:
                 res = client.send_message(
-                    carta_message(carta_url, cfg.language),
+                    _carta_text(cfg, carta_url),
                     thread_id=cfg.telegram.thread_id_for("carta"),
                 )
                 if res.ok:
@@ -204,6 +267,12 @@ def run_cycle(
         result.errors.append(f"calendari: {exc}")
         state.bump_error("calendari")
         log.error("Error obtenint el calendari: %s", exc)
+
+    # --- Agenda setmanal (si toca) ---
+    weekly = maybe_publish_weekly(cfg, state, client, now)
+    if weekly:
+        result.published += weekly
+        changed = True
 
     if changed:
         state.mark_change()

@@ -8,5 +8,10 @@
   "calendari.link": "Ver el calendario",
   "welcome.title": "Servicio de avisos de la AFA",
   "welcome.body": "Este canal publica avisos del centro a partir de su web pública.",
-  "welcome.start": "Empieza ahora."
+  "welcome.start": "Empieza ahora.",
+  "carta.filtrada_intro": "Lo que toca a tu curso:",
+  "carta.full_link": "Ver la carta completa (PDF)",
+  "agenda.title": "Agenda de la semana",
+  "agenda.empty": "Esta semana no hay ningún acto programado.",
+  "agenda.full_link": "Ver la carta del mes"
 }

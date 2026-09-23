@@ -70,3 +70,13 @@
 - [x] 10.2 Selecció d'idioma a `config.yaml` (`language`) amb override per entorn (`LANGUAGE`) i normalització de variants regionals; verificar amb tests
 - [x] 10.3 Missatges del servei construïts des del catàleg (per defecte català); verificar amb tests que els textos canvien per idioma i fan retrocés segur
 - [x] 10.4 Documentar com triar i afegir idioma (README i `docs/guia-telegram.md`); verificar seccions presents
+
+## 11. Agenda de la carta (carta-agenda)
+
+- [x] 11.1 Parser de la carta: extreure mes/any i esdeveniments (dia, curs, activitat) del text del PDF; verificar amb fixture de text real i amb la carta real
+- [x] 11.2 Filtratge per cursos configurats (+ compartits); verificar que només surten els del curs objectiu i els compartits
+- [x] 11.3 Missatges d'i18n: selecció de la carta i agenda setmanal (ca/es/en); verificar tests de format
+- [x] 11.4 Publicar la selecció en detectar carta nova (amb fallback a avís+enllaç si no hi ha taula); verificar amb test d'integració
+- [x] 11.5 Agenda setmanal programada (dia/hora) amb estat `last_weekly_post` i sense duplicats; verificar amb rellotge simulat
+- [x] 11.6 Config `agenda` (activar, cursos, carta_filtrada, setmanal dia/hora, topic); verificar càrrega de l'exemple
+- [x] 11.7 Actualitzar docs (README/guia) amb l'agenda; verificar seccions presents

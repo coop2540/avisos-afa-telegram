@@ -155,6 +155,22 @@ language: ca   # opcions: ca, es, en (catàlegs a src/i18n/)
 Per afegir un idioma nou, copia `src/i18n/ca.json` a `<codi>.json` i tradueix
 els valors. No cal tocar el codi.
 
+### Agenda de la carta
+
+El servei extreu la taula d'activitats de la carta i en publica la selecció del
+curs (en sortir carta nova) i una agenda setmanal. Es configura a `config.yaml`:
+
+```yaml
+agenda:
+  enabled: true
+  cursos: ["I4", "Tothom", "Famílies"]   # "I4" inclou "I4B"
+  carta_filtrada: true
+  setmanal:
+    enabled: true
+    dia: 1        # 1=dilluns … 7=diumenge
+    hora: "08:00"
+```
+
 ---
 
 ## 5. Provar

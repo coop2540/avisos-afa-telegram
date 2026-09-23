@@ -94,3 +94,38 @@ def welcome_message(lang: str = DEFAULT_LANG) -> str:
         f"{_esc(translate('welcome.body', lang))}\n"
         f"{_esc(translate('welcome.start', lang))}"
     )
+
+
+def _event_line(event) -> str:
+    """Línia d'un esdeveniment (data dd/mm · activitat)."""
+    return f"• {event.date.strftime('%d/%m')} · {_esc(event.activitat)}"
+
+
+def carta_filtrada_message(events, carta_url: str, lang: str = DEFAULT_LANG) -> str:
+    """Selecció d'activitats del curs amb enllaç a la carta completa."""
+    lines = [
+        f"📚 <b>{_esc(translate('carta.title', lang))}</b>",
+        _esc(translate("carta.filtrada_intro", lang)),
+    ]
+    lines.extend(_event_line(e) for e in events)
+    lines.append(
+        f'<a href="{_esc(carta_url)}">{_esc(translate("carta.full_link", lang))}</a>'
+    )
+    return "\n".join(lines)
+
+
+def agenda_message(events, week_start, week_end, carta_url: str | None, lang: str = DEFAULT_LANG) -> str:
+    """Agenda setmanal amb els actes de la setmana."""
+    lines = [
+        f"📅 <b>{_esc(translate('agenda.title', lang))}</b>",
+        _esc(f"{week_start.strftime('%d/%m')} – {week_end.strftime('%d/%m')}"),
+    ]
+    if events:
+        lines.extend(_event_line(e) for e in events)
+    else:
+        lines.append(_esc(translate("agenda.empty", lang)))
+    if carta_url:
+        lines.append(
+            f'<a href="{_esc(carta_url)}">{_esc(translate("agenda.full_link", lang))}</a>'
+        )
+    return "\n".join(lines)

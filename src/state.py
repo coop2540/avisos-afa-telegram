@@ -33,6 +33,7 @@ class State:
     ultima_novetat: str | None = None
     intent_errors: dict[str, int] = field(default_factory=dict)
     baseline_done: bool = False
+    last_weekly_post: str | None = None
     version: int = STATE_VERSION
 
     # --- càrrega / guardat -------------------------------------------------
@@ -58,6 +59,7 @@ class State:
             ultima_novetat=data.get("ultima_novetat"),
             intent_errors=dict(data.get("intent_errors") or {}),
             baseline_done=bool(data.get("baseline_done", False)),
+            last_weekly_post=data.get("last_weekly_post"),
             version=int(data.get("version", STATE_VERSION)),
         )
 
@@ -73,6 +75,7 @@ class State:
             "ultima_novetat": self.ultima_novetat,
             "intent_errors": self.intent_errors,
             "baseline_done": self.baseline_done,
+            "last_weekly_post": self.last_weekly_post,
         }
         fd, tmp_name = tempfile.mkstemp(dir=str(p.parent), prefix=".state-", suffix=".tmp")
         try:

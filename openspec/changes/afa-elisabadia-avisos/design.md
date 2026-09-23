@@ -130,6 +130,13 @@ docs/transparencia.md # publicable a Nextcloud
 - **Alternatives:** gettext/`babel` (més maquinària i dependències per a unes poques cadenes); textos incrustats (descartat a D5).
 - **Límit:** la documentació (`docs/`) es manté en català de moment; es podrà traduir més endavant si el projecte es reutilitza.
 
+### D13 — Parser de la carta i agenda
+
+- **Tria:** `pdfplumber` per extreure el **text** del PDF; parser per línies amb regex `^(\d{1,2})\s+(\S+)\s+(.+)$` després de la capçalera «Dia Curs Activitat»; mes/any de la capçalera «CARTA DEL MES DE <mes> <any>». Filtre per cursos configurats. Dues sortides: (1) **selecció** en detectar carta nova (reutilitza l'esdeveniment de carta existent), i (2) **agenda setmanal** programada (dia/hora) amb estat `last_weekly_post`.
+- **Per què:** la taula és **text pla** al PDF → sense OCR ni IA; `extract_text` dona files netes; reutilitza el flux de detecció de carta; el filtre per curs compleix la visió original («el que toca al grup del teu fill»).
+- **Descartat:** OCR (innecessari); `extract_tables()` (retorna les columnes com una sola cel·la amb salts; el text per línies és més fiable).
+- **Límit:** si la setmana creua de mes, els actes del mes següent no apareixen fins que surt la carta nova; si la carta no té taula, es cau a avís+enllaç.
+
 
 ## Risks / Trade-offs
 

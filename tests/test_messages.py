@@ -1,12 +1,17 @@
-"""Tests de les plantilles de missatge en català (tasca 4.3)."""
+"""Tests de les plantilles de missatge en català (tasca 4.3, 11.3)."""
+
+from datetime import date
 
 from src.messages import (
+    agenda_message,
     calendari_message,
+    carta_filtrada_message,
     carta_message,
     noticia_message,
     plain_summary,
     welcome_message,
 )
+from src.parse_carta import CartaEvent
 
 
 def test_carta_message_has_title_and_link():
@@ -76,3 +81,34 @@ def test_plain_summary_handles_br():
 
 def test_welcome_message_mentions_afa():
     assert "AFA" in welcome_message()
+
+
+def test_carta_filtrada_message():
+    events = [
+        CartaEvent(date(2026, 9, 15), "I4", "Reunió de famílies (15h)"),
+        CartaEvent(date(2026, 9, 21), "Famílies", "Reunió del menjador"),
+    ]
+    msg = carta_filtrada_message(events, "https://x.test/c.pdf")
+    assert "El que toca al teu curs" in msg
+    assert "15/09 · Reunió de famílies (15h)" in msg
+    assert "21/09 · Reunió del menjador" in msg
+    assert 'href="https://x.test/c.pdf"' in msg
+
+
+def test_agenda_message_with_events():
+    events = [CartaEvent(date(2026, 9, 21), "Famílies", "Reunió del menjador")]
+    msg = agenda_message(events, date(2026, 9, 21), date(2026, 9, 27), "https://x.test/c.pdf")
+    assert "Agenda de la setmana" in msg
+    assert "21/09 – 27/09" in msg
+    assert "21/09 · Reunió del menjador" in msg
+    assert 'href="https://x.test/c.pdf"' in msg
+
+
+def test_agenda_message_empty():
+    msg = agenda_message([], date(2026, 9, 21), date(2026, 9, 27), "https://x.test/c.pdf")
+    assert "no hi ha cap acte" in msg
+
+
+def test_agenda_message_localized():
+    msg = agenda_message([], date(2026, 9, 21), date(2026, 9, 27), None, "es")
+    assert "Agenda de la semana" in msg

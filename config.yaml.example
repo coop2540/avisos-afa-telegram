@@ -5,6 +5,9 @@
 # Per defecte: ca. Altres: es, en. Afegir-ne un = afegir un fitxer JSON.
 language: ca
 
+# Zona horària per a la planificació (agenda setmanal).
+timezone: Europe/Madrid
+
 site:
   base_url: "https://agora.xtec.cat/escolaelisabadia"
   homepage: "https://agora.xtec.cat/escolaelisabadia/"
@@ -49,8 +52,22 @@ telegram:
     rss: null
     carta: null
     calendari: null
+    agenda: null
 
 first_run:
   # Si false (recomanat), la primera execució només desa la línia base sense
   # publicar l'històric. Si true, publica un únic avís de benvinguda.
   publish_welcome: false
+
+agenda:
+  # Agenda extreta de la taula d'activitats de la carta (Dia | Curs | Activitat).
+  enabled: true
+  # Cursos que t'interessen (i etiquetes compartides). "I4" inclou "I4B".
+  cursos: ["I4", "Tothom", "Famílies"]
+  # En detectar carta nova, publicar la selecció d'activitats del curs (a més de l'enllaç).
+  carta_filtrada: true
+  setmanal:
+    # Publicar l'agenda de la setmana un dia i hora concrets.
+    enabled: true
+    dia: 1        # 1=dilluns … 7=diumenge
+    hora: "08:00"

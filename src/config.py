@@ -7,6 +7,7 @@ la resta de paràmetres són a `config.yaml`. Vegeu `config.yaml.example`.
 from __future__ import annotations
 
 import os
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -77,6 +78,16 @@ class FirstRunConfig:
 
 
 @dataclass
+class AgendaConfig:
+    enabled: bool = False
+    cursos: list[str] = field(default_factory=list)
+    carta_filtrada: bool = True
+    weekly_enabled: bool = False
+    weekly_day: int = 1  # 1=dilluns … 7=diumenge
+    weekly_time: tuple[int, int] = (8, 0)
+
+
+@dataclass
 class Config:
     site: SiteConfig
     rss: RssConfig
@@ -84,7 +95,9 @@ class Config:
     poll: PollConfig
     telegram: TelegramConfig
     first_run: FirstRunConfig
+    agenda: AgendaConfig = field(default_factory=AgendaConfig)
     language: str = DEFAULT_LANG
+    timezone: str = "Europe/Madrid"
     state_path: Path = Path(DEFAULT_STATE_PATH)
     config_path: Path | None = None
 
@@ -114,6 +127,19 @@ def _section(data: dict[str, Any], key: str) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise ConfigError(f"La secció '{key}' de la configuració ha de ser un mapa.")
     return value
+
+
+def _parse_hhmm(value: Any, default: tuple[int, int] = (8, 0)) -> tuple[int, int]:
+    """Converteix 'HH:MM' en (hora, minut); si no és vàlid, retorna el defecte."""
+    if not value:
+        return default
+    match = re.match(r"^(\d{1,2}):(\d{2})$", str(value).strip())
+    if not match:
+        return default
+    hour, minute = int(match.group(1)), int(match.group(2))
+    if 0 <= hour < 24 and 0 <= minute < 60:
+        return (hour, minute)
+    return default
 
 
 def load_config(config_path: str | Path | None = None) -> Config:
@@ -187,7 +213,23 @@ def load_config(config_path: str | Path | None = None) -> Config:
         publish_welcome=_as_bool(_section(raw, "first_run").get("publish_welcome"), False)
     )
 
+    agenda_raw = _section(raw, "agenda")
+    setmanal_raw = _section(agenda_raw, "setmanal")
+    weekly_day = int(setmanal_raw.get("dia", 1))
+    if not 1 <= weekly_day <= 7:
+        weekly_day = 1
+    agenda = AgendaConfig(
+        enabled=_as_bool(agenda_raw.get("enabled"), False),
+        cursos=[str(c) for c in (agenda_raw.get("cursos") or [])],
+        carta_filtrada=_as_bool(agenda_raw.get("carta_filtrada"), True),
+        weekly_enabled=_as_bool(setmanal_raw.get("enabled"), False),
+        weekly_day=weekly_day,
+        weekly_time=_parse_hhmm(setmanal_raw.get("hora")),
+    )
+
     language = normalize_language(os.environ.get("LANGUAGE") or raw.get("language"))
+
+    tz_name = str(raw.get("timezone") or os.environ.get("TZ") or "Europe/Madrid")
 
     state_path = Path(os.environ.get("STATE_PATH") or DEFAULT_STATE_PATH)
 
@@ -198,7 +240,9 @@ def load_config(config_path: str | Path | None = None) -> Config:
         poll=poll,
         telegram=telegram,
         first_run=first_run,
+        agenda=agenda,
         language=language,
+        timezone=tz_name,
         state_path=state_path,
         config_path=path,
     )

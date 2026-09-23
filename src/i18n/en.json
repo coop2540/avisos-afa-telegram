@@ -8,5 +8,10 @@
   "calendari.link": "View the calendar",
   "welcome.title": "AFA alerts service",
   "welcome.body": "This channel publishes school notices from its public website.",
-  "welcome.start": "Starting now."
+  "welcome.start": "Starting now.",
+  "carta.filtrada_intro": "What's on for your year group:",
+  "carta.full_link": "View the full newsletter (PDF)",
+  "agenda.title": "This week's agenda",
+  "agenda.empty": "No events scheduled this week.",
+  "agenda.full_link": "View the newsletter"
 }
