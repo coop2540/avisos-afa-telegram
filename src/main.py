@@ -7,6 +7,8 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
+from dotenv import load_dotenv
+
 from .config import Config, load_config
 from .fetch_calendari import fetch_calendari, hash_content
 from .fetch_carta import fetch_carta_url
@@ -269,6 +271,8 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
+    # Carrega `.env` (si existeix) sense sobreescriure variables ja definides.
+    load_dotenv()
     setup_logging()
     try:
         cfg = load_config(args.config)

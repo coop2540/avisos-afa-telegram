@@ -59,8 +59,22 @@ Temps aproximat: 15 minuts.
 5. Fes el bot **administrador** amb aquests permisos:
    - **Enviar missatges** (per publicar).
    - **Gestionar temes** (per poder crear topics i publicar-hi).
-6. Restringeix qui pot escriure: **Ajustos → Permisos → Enviar missatges →
-   Només administradors**. Així les famílies només llegeixen (anti-soroll).
+6. Restringeix qui pot escriure, perquè les famílies **només llegeixin**:
+   - **Mòbil:** toca el nom del grup → **Edita** (llapis) → **Permisos** →
+     **desactiva** l'interruptor **Enviar missatges**.
+   - **Escriptori:** clica el nom del grup → **Edita** → **Permisos** →
+     **desactiva** **Enviar missatges**.
+   - Alguns clients mostren una opció **Enviar missatges** amb els valors
+     *Tots els membres* / *Només administradors*: tria **Només administradors**.
+   - És un permís **a nivell de grup** (val per tots els topics del fòrum).
+   - Els **administradors** (i el bot) sempre poden escriure; els membres només
+     llegeixen (anti-soroll).
+
+   **Conjunt recomanat** a la pantalla «Permisos» (deixa-ho tot en vermell
+   excepte el que vulguis): desactiva **Enviar missatges**, **Crear temes**,
+   **Fixar missatges**, **Afegir membres** i **Canviar la informació del grup**.
+   Així les famílies només llegeixen i només els administradors organitzen el
+   grup.
 7. Privacitat: **Ajustos → Grups i canals → Grup privat**. Activa **Aprovar
    membres nous** (sol·licituds d'unió) si vols controlar qui entra.
 8. Crea els **topics** que vulguis (General, Cartes, Calendari, I4, 3r…).
@@ -208,5 +222,7 @@ traduir-se als catàlegs `src/i18n/*.json` (vegeu «Idioma dels missatges»).
 | `getUpdates` buit | No has enviat missatge després d'afegir el bot, o hi ha un webhook configurat |
 | `403` en publicar | El bot no és admin o no té permís «Enviar missatges» |
 | `message thread not found` | `message_thread_id` incorrecte per a aquell topic |
+| No trobo «Només administradors» | En grups sol ser un **interruptor** «Enviar missatges» que has de **desactivar** (no un desplegable) |
+| El bot no pot crear topics | Fes-lo admin amb el permís **Gestionar temes** |
 | No publica res | Primera execució (només línia base) o `DRY_RUN=1` actiu |
 | Avisos duplicats | `state/` no persisteix entre reinicis (revisa el volum) |
