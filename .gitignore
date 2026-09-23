@@ -19,3 +19,6 @@ venv/
 
 # Reportes puntuals d'anàlisi
 REVIEW.md
+
+# Personalització local del desplegament (no és producte)
+local/
