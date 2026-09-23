@@ -10,7 +10,7 @@ Restriccions que marquen el disseny:
 - Desplegament **escalonat**: operador sol → 1 beta → anuncis de features → AFA → famílies.
 - La web del centre **no es toca** (només HTTP de lectura, interval amable).
 - Transparencia com a part del producte (doc pública, veure `service-transparency`).
-- El projecte **acabarà en un repositori públic** (GitHub); primer es revisa en **Forgejo privat** (instància pròpia a la xarxa local).
+- El projecte **acabarà en un repositori públic** (GitHub); primer es revisa en un repositori **privat** (instància pròpia).
 
 Fonts reals verificades durant l'exploració:
 
@@ -105,11 +105,14 @@ Dockerfile / compose.yml
 docs/transparencia.md # publicable a Nextcloud
 ```
 
-### D9 — Hosting del repositori: Forgejo privat → GitHub públic
+### D9 — Hosting del repositori: privat → públic
 
-- **Tria:** repositori git local; remot `origin` = Forgejo propi (`ssh://git@192.168.0.18:222/jordan/...`), privat; remot `github` afegit quan s'aprovi per publicar.
-- **Per què:** Forgejo és instància pròpia ja en marxa (Docker a la xarxa local) i permet veure "com queda" sense exposar-ho; GitHub dona visibilitat i col·laboració externa quan el projecte estigui llest.
-- **Descartat:** publicar directament a GitHub (sense fase de revisió); dependre només de GitHub (perd control sobre la revisió prèvia).
+- **Tria:** repositori git local; un remot privat en una instància pròpia mentre es treballa, i el remot públic (GitHub) quan s'aprova la publicació.
+- **Per què:** permet veure "com queda" sense exposar-ho; GitHub dona visibilitat i col·laboració externa quan el projecte estigui llest.
+- **Descartat:** publicar directament (sense fase de revisió); dependre només d'una plataforma (perds la revisió prèvia).
+
+> Detalls concrets del desplegament (URLs, hosts, usuaris) no es documenten al
+> repositori públic; viuen a la configuració local de qui desplega.
 
 ### D10 — Llicència oberta
 
@@ -146,14 +149,14 @@ docs/transparencia.md # publicable a Nextcloud
 - **[Taula de la carta és imatge → caldria OCR]** → fora de fase A (avís+enllaç); si B ho necessita, llavors pymupdf primer i OCR com a últim recurs.
 - **[Telegram rate limit / error de xat]** → retry amb backoff senzill; no marcar dedup fins a enviament OK (o cua de fallits); alerta als logs.
 - **[Spam en el grup quan s'obri a famílies]** → només admins publiquen + join-request + doc de normes; no dependre de moderació manual.
-- **[Operador únic = bus factor 1]** → tot a git + doc de transparencia + secretos en Vaultwarden; migració AFA documentada com a pas de deploy.
+- **[Operador únic = bus factor 1]** → tot a git + doc de transparencia + secretos en un gestor de secretos; migració documentada com a pas de deploy.
 - **[Agressió a XTEC] (ètica i tècnica)** → intervals amables, UA identificable, sense scraping de pàgines innecessàries; RSS quan existeix.
 - **[Secret filtrat a l'historial git]** → `.gitignore` des del primer commit; auditoria de secretes abans de publicar; si s'hi filtrés, rotar el token (no n'hi ha prou d'esborrar el fitxer).
 
 ## Migration Plan
 
-1. Desenvolupament local/dev (Geekom) amb xat de proves i 1–2 topics.
-2. Contenedor a VPS (o Geekom always-on): posar `.env`, `config.yaml`, volum `state/`.
+1. Desenvolupament local/dev amb xat de proves i 1–2 topics.
+2. Contenedor a un servidor propi (VPS petit o màquina always-on): posar `.env`, `config.yaml`, volum `state/`.
 3. Canari: operador únic; revisar logs 1–2 setmanes i calibrar intervals.
 4. Convidar 1 beta tester (invitació/seguretat del grup ja activa).
 5. Activar més topics i publicar doc de transparencia a espai públic AFA/Nextcloud.

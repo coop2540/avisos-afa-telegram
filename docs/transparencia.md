@@ -4,8 +4,7 @@
 > Barberà del Vallès). Cada associació que desplegui aquest servei ha d'adaptar
 > aquest document al seu centre. El programari és genèric i reutilitzable.
 >
-> URL pública (per citar des del canal o l'AFA):
-> `https://github.com/coop2540/avisos-afa-telegram/blob/main/docs/transparencia.md`
+> URL pública: la del repositori d'aquest desplegament (el mateix `docs/transparencia.md`).
 
 > Document públic. Explica què fa aquest servei, d'on treu la informació,
 > quines dades toca i qui el sosté. Si trobes res incorrecte, avisa'ns.

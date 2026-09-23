@@ -1,32 +1,33 @@
 # Flux de publicació del repositori
 
-El projecte es publica a **GitHub** (públic). Opcionalment, es pot mantenir un
-**mirall privat** a Forgejo (instància pròpia) mentre es treballa.
+Guia genèrica per publicar el projecte. Cada qui adapta el seu remot a la seva
+plataforma (GitHub, GitLab, Forgejo…).
 
 ## Remots
 
-| Remot | Destinació | Visibilitat | Ús |
-|-------|-----------|-------------|-----|
-| `origin` | GitHub (`git@github.com:coop2540/avisos-afa-telegram.git`) | Públic | Enviament habitual |
-| `forgejo` | Forgejo propi (`ssh://git@192.168.0.18:222/jordan/avisos-afa-telegram.git`) | Privat | Mirall privat (opcional) |
-
-Afegir els remots:
+Els remots són **concrets de cada desplegament** i no es versionen. Defineix-los
+al teu entorn:
 
 ```bash
-git remote add origin git@github.com:coop2540/avisos-afa-telegram.git
-# Mirall privat (opcional):
-git remote add forgejo ssh://git@192.168.0.18:222/jordan/avisos-afa-telegram.git
+git remote add origin <URL-del-teu-repositori>
 ```
+
+Si vols mantenir un **mirall privat** (p. ex. una instància pròpia) mentre
+treballes, afegeix-lo com a remot addicional:
+
+```bash
+git remote add mirror <URL-del-mirall>
+```
+
+> Els detalls del teu entorn concret (URLs, hosts, usuaris) no han de viure en
+> aquest fitxer del repositori públic.
 
 ## Documentació pública
 
 La documentació del servei (transparència, guia, full de ruta) viu **dins el
-repositori**, així que GitHub la publica com a pàgina web navegable i amb
-historial. URL de referència:
-
-- Transparència: `https://github.com/coop2540/avisos-afa-telegram/blob/main/docs/transparencia.md`
-
-Aquesta és la URL que es pot citar des del canal de Telegram o des de l'AFA.
+repositori**, així que la plataforma la publica com a pàgina web navegable i amb
+historial. Les URLs de referència es poden citar des del canal de Telegram o des
+de l'associació.
 
 ## Preparar una versió pública
 
@@ -40,23 +41,21 @@ Abans de fer públic el repositori:
 2. **Revisar el que es versiona**:
    ```bash
    git status --porcelain
-   git ls-files   # després del primer commit
+   git ls-files
    ```
-   No hi ha d'haver `.env`, `config.yaml` ni `state/`.
+   No hi ha d'haver `.env`, `config.yaml`, `state/` ni `local/`.
 3. **Comprovar README i LICENSE** presents i correctes.
-4. Fer el push a GitHub i verificar que el repo és públic i que no exposa
-   secrets.
+4. Fer el push i verificar que el repositori és públic i que no exposa secrets.
 
 > Si mai es filtrés un secret, **rotar-lo** (no n'hi ha prou d'esborrar el
 > fitxer: queda a l'historial).
 
-## Primer enviament
+## Primera publicació
 
 ```bash
 git add -A
-git commit -m "Primera versió del servei d'avisos (fase A)"
+git commit -m "Primera versió del servei d'avisos"
 git push -u origin main
 ```
 
-El repositori de GitHub s'ha de crear **buit** (sense README ni .gitignore) i
-públic abans del push.
+Crea el repositori **buit** (sense README ni .gitignore) abans del push.

@@ -30,7 +30,7 @@
 
 - [x] 5.1 Loop principal: cicle fetchers → diff → publicar → persistir estat → dormir segons interval adaptatiu; verificar un cicle complet en local amb xat de proves
 - [x] 5.2 Dockerfile (python:3.12-slim) + compose amb volum `state/`, `.env`, restart unless-stopped; verificar `docker compose up` i supervivència de l'estat a `docker compose restart`
-- [x] 5.3 Desplegar en destí (VPS o Geekom) amb xat canari i només topic general; verificar arribada d'un aviso real (carta o RSS) al grup
+- [x] 5.3 Desplegar en un servidor propi amb xat canari i només topic general; verificar arribada d'un aviso real (carta o RSS) al grup
 - [ ] 5.4 Robustesa 48h: logs nets, cap duplicat, intervals adaptatius plausibles; verificar revisant logs i missatges de dues dies
 
 ## 6. Grup Telegram i anti-bot (configuració, no codi)
