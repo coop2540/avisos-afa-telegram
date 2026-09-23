@@ -110,10 +110,47 @@ def maybe_publish_menu(
     calendar: SchoolCalendar | None = None,
     target: date | None = None,
 ) -> MenuCycleResult:
-    """Resol el PDF, fa el pin si cal i publica el menú de demà per variant."""
+    """Resol el PDF, fa el pin si cal i publica el menú de demà per variant.
+
+    Estalvi de peticions a la web del centre (no sabem quan publiquen el PDF
+    nou del mes): abans de l'slot només es toca la web un cop al dia (per
+    actualitzar el pin si l'URL canvia); a l'slot es fa el cicle complet;
+    un cop resolt el slot del dia, no es torna a tocar res fins l'endemà.
+    """
     result = MenuCycleResult()
     if not cfg.menu.enabled:
         return result
+
+    slot_h, slot_m = cfg.menu.hora
+    after_slot = (now.hour, now.minute) >= (slot_h, slot_m)
+    today = now.date().isoformat()
+
+    # --- Abans de l'slot: com a molt, una revisió d'URL al dia (pin) -------
+    if not after_slot:
+        if state.menu_url_checked_on == today:
+            return result  # ja s'ha comprovat avui: 0 peticions
+        pdf_url = menu_url
+        if pdf_url is None:
+            try:
+                pdf_url = fetch_menu_url(
+                    page_url=cfg.menu.page_url or cfg.site.homepage,
+                    base_url=cfg.site.base_url,
+                    user_agent=cfg.site.user_agent,
+                    link_markers=cfg.menu.link_markers,
+                    fallback_href_excludes=cfg.menu.fallback_href_excludes,
+                )
+            except Exception as exc:
+                result.errors.append(f"menu-url: {exc}")
+                log.error("No s'ha pogut resoldre l'URL del PDF del menú: %s", exc)
+                return result
+        if pdf_url:
+            _refresh_pin(cfg, state, client, pdf_url, result)
+            state.menu_url_checked_on = today
+        return result
+
+    # --- A l'slot (o després): cicle complet, un sol cop al dia -----------
+    if state.menu_slot_done_on == today:
+        return result  # slot d'avui ja resolt: 0 peticions
 
     pdf_url = menu_url
     if pdf_url is None:
@@ -132,6 +169,7 @@ def maybe_publish_menu(
 
     if not pdf_url:
         log.warning("Sense URL de PDF del menú; s'omet el menú.")
+        state.menu_slot_done_on = today
         return result
 
     if calendar is None:
@@ -140,13 +178,16 @@ def maybe_publish_menu(
     if target is None:
         target = menu_target_date(now, calendar)
 
-    # Pin amb l'enllaç vigent (sempre que canviï l'URL), independent del slot.
+    # Pin amb l'enllaç vigent (sempre que canviï l'URL).
     _refresh_pin(cfg, state, client, pdf_url, result)
+    state.menu_url_checked_on = today
 
     if target is None:
         log.info("Demà no és dia lectiu; no es publica menú.")
+        state.menu_slot_done_on = today
         return result
 
+    no_cell: set[str] = set()
     for variant in cfg.menu.active_variants():
         if not should_post_menu(now, cfg.menu, target, state.menu_posted, variant.id):
             continue
@@ -159,7 +200,10 @@ def maybe_publish_menu(
             log.error("Error obtenint el menú de la variant %s: %s", variant.id, exc)
             continue
         if not plates:
+            # La cel·la no existeix al PDF: reintentar-ho no la farà aparèixer
+            # (el PDF del mes és estàtic). Compta com a resolt per avui.
             log.info("Sense cel·la de menú per a %s (variant %s).", target, variant.id)
+            no_cell.add(variant.id)
             continue
         text = menu_dema_message(plates, target, variant.id, cfg.language)
         thread = cfg.telegram.thread_id_for(variant.topic or "default")
@@ -172,4 +216,16 @@ def maybe_publish_menu(
             result.failed += 1
             log.error("No s'ha pogut publicar el menú (variant %s).", variant.id)
 
+    # Slot resolt quan no queda res pendent: totes les variants publicades o
+    # sense cel·la. Si Telegram ha fallat, NO es marca i es reintentarà al
+    # proper cicle (la dedup de `menu_posted` evita duplicats).
+    pending = [
+        v.id
+        for v in cfg.menu.active_variants()
+        if state.menu_posted.get(v.id) != target.isoformat() and v.id not in no_cell
+    ]
+    if not pending:
+        state.menu_slot_done_on = today
+    else:
+        log.warning("Menú pendent de reintentar (variants: %s).", ", ".join(pending))
     return result
