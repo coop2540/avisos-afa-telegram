@@ -13,5 +13,10 @@
   "carta.full_link": "Ver la carta completa (PDF)",
   "agenda.title": "Agenda de la semana",
   "agenda.empty": "Esta semana no hay ningún acto programado.",
-  "agenda.full_link": "Ver la carta del mes"
+  "agenda.full_link": "Ver la carta del mes",
+  "menu.title": "Mañana comemos {data}",
+  "menu.variant.basal": "Menú basal",
+  "menu.variant.sense_porc": "Sin cerdo",
+  "menu.pin_title": "Menú del mes (PDF)",
+  "menu.pin_link": "Abrir el menú del mes"
 }

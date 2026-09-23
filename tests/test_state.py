@@ -67,3 +67,26 @@ def test_corrupt_state_starts_fresh(tmp_path):
     path.write_text("{ not json", encoding="utf-8")
     state = State.load(path)
     assert state.is_new is True
+
+
+def test_menu_state_round_trip(tmp_path):
+    path = tmp_path / "state.json"
+    state = State()
+    state.menu_pdf_url = "https://x.test/Basal.pdf"
+    state.menu_posted = {"basal": "2026-09-24", "sense_porc": "2026-09-24"}
+    state.menu_pin_ids = {"basal": 111, "sense_porc": 222}
+    state.save(path)
+
+    loaded = State.load(path)
+    assert loaded.menu_pdf_url == "https://x.test/Basal.pdf"
+    assert loaded.menu_posted == {"basal": "2026-09-24", "sense_porc": "2026-09-24"}
+    assert loaded.menu_pin_ids == {"basal": 111, "sense_porc": 222}
+
+
+def test_old_state_without_menu_keys(tmp_path):
+    path = tmp_path / "state.json"
+    path.write_text('{"version": 1, "rss_guids": ["a"]}', encoding="utf-8")
+    state = State.load(path)
+    assert state.menu_pdf_url is None
+    assert state.menu_posted == {}
+    assert state.menu_pin_ids == {}

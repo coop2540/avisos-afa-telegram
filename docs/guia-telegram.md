@@ -136,6 +136,9 @@ telegram:
     rss: 12           # notícies
     carta: 13         # carta del mes
     calendari: 14     # calendari
+    agenda: 15        # agenda setmanal
+    menu_basal: 16    # menú del menjador (basal)
+    menu_sense_porc: 17  # menú del menjador (sense porc)
 ```
 
 Qualsevol origen sense topic propi cau a `default` (topic general).
@@ -166,6 +169,34 @@ agenda:
     dia: 1        # 1=dilluns … 7=diumenge
     hora: "08:00"
 ```
+
+### Menú del menjador
+
+El servei pot publicar el **menú de demà** el dia anterior a les 19:00, als topics
+de cada variant (per exemple, basal i sense porc). El PDF del menú és mensual i
+canvia d'URL; el servei la resol de la pàgina del menjador i manté un **missatge
+fixat** amb l'enllaç vigent a cada topic.
+
+```yaml
+menu:
+  enabled: true
+  hora: "19:00"
+  page_url: "https://agora.xtec.cat/escolaelisabadia/serveis/menjador-escolar/"
+  variants:
+    - id: basal
+      page: 0                    # 0-based: 0=primera pàgina (basal), 1=sense porc
+      topic: menu_basal
+      enabled: true
+    - id: sense_porc
+      page: 1
+      topic: menu_sense_porc
+      enabled: true
+```
+
+El missatge diari només conté els plats (sense enllaç); l'enllaç viu al missatge
+fixat. Si l'endemà no és dia lectiu (cap de setmana o festa del calendari), no es
+publica res. Per donar d'alta una variant nova (p. ex. "sense lactosa") n'hi ha
+prou d'afegir-la aquí si el PDF en té la pàgina.
 
 ---
 

@@ -34,6 +34,9 @@ class State:
     intent_errors: dict[str, int] = field(default_factory=dict)
     baseline_done: bool = False
     last_weekly_post: str | None = None
+    menu_pdf_url: str | None = None
+    menu_posted: dict[str, str] = field(default_factory=dict)
+    menu_pin_ids: dict[str, int] = field(default_factory=dict)
     join_requests: dict[str, dict[str, str]] = field(default_factory=dict)
     version: int = STATE_VERSION
 
@@ -61,6 +64,9 @@ class State:
             intent_errors=dict(data.get("intent_errors") or {}),
             baseline_done=bool(data.get("baseline_done", False)),
             last_weekly_post=data.get("last_weekly_post"),
+            menu_pdf_url=data.get("menu_pdf_url"),
+            menu_posted=dict(data.get("menu_posted") or {}),
+            menu_pin_ids={k: int(v) for k, v in (data.get("menu_pin_ids") or {}).items()},
             join_requests=dict(data.get("join_requests") or {}),
             version=int(data.get("version", STATE_VERSION)),
         )
@@ -78,6 +84,9 @@ class State:
             "intent_errors": self.intent_errors,
             "baseline_done": self.baseline_done,
             "last_weekly_post": self.last_weekly_post,
+            "menu_pdf_url": self.menu_pdf_url,
+            "menu_posted": self.menu_posted,
+            "menu_pin_ids": self.menu_pin_ids,
             "join_requests": self.join_requests,
         }
         fd, tmp_name = tempfile.mkstemp(dir=str(p.parent), prefix=".state-", suffix=".tmp")

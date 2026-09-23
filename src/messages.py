@@ -129,3 +129,23 @@ def agenda_message(events, week_start, week_end, carta_url: str | None, lang: st
             f'<a href="{_esc(carta_url)}">{_esc(translate("agenda.full_link", lang))}</a>'
         )
     return "\n".join(lines)
+
+
+def menu_dema_message(plates, target, variant_id: str, lang: str = DEFAULT_LANG) -> str:
+    """Missatge diari «Demà dinem …» amb la data i els plats (sense enllaç)."""
+    title = translate("menu.title", lang, data=target.strftime("%d/%m"))
+    lines = [f"🍽️ <b>{_esc(title)}</b>"]
+    label = translate(f"menu.variant.{variant_id}", lang)
+    if label and label != f"menu.variant.{variant_id}":
+        lines.append(f"<i>{_esc(label)}</i>")
+    for plate in plates:
+        lines.append(_esc(plate))
+    return "\n".join(lines)
+
+
+def menu_pin_message(pdf_url: str, lang: str = DEFAULT_LANG) -> str:
+    """Missatge anunciat amb l'enllaç al PDF del menú del mes vigent."""
+    return (
+        f"📎 <b>{_esc(translate('menu.pin_title', lang))}</b>\n"
+        f'<a href="{_esc(pdf_url)}">{_esc(translate("menu.pin_link", lang))}</a>'
+    )

@@ -13,5 +13,10 @@
   "carta.full_link": "View the full newsletter (PDF)",
   "agenda.title": "This week's agenda",
   "agenda.empty": "No events scheduled this week.",
-  "agenda.full_link": "View the newsletter"
+  "agenda.full_link": "View the newsletter",
+  "menu.title": "Tomorrow's lunch {data}",
+  "menu.variant.basal": "Standard menu",
+  "menu.variant.sense_porc": "No pork",
+  "menu.pin_title": "This month's menu (PDF)",
+  "menu.pin_link": "Open this month's menu"
 }

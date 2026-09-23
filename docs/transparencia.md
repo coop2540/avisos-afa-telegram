@@ -55,6 +55,8 @@ Només de fonts **públiques** del centre:
 - La **carta del mes** (PDF enllaçat a la portada).
 - El **calendari del curs** (pàgina pública del centre).
 - Les **notícies** del blog (RSS públic), filtrades per curs i temes generals.
+- El **menú del menjador** (PDF mensual de la pàgina del menjador), per publicar
+  els plats de demà el dia abans.
 
 No accedim a cap àrea privada, ni a Google Classroom, ni a dades
 d'alumnes.

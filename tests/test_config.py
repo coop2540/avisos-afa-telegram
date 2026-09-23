@@ -73,6 +73,50 @@ def test_thread_id_fallback():
     assert cfg.telegram.thread_id_for("carta") == 7  # fallback a default
 
 
+def test_menu_config_from_example():
+    cfg = load_config("config.yaml.example")
+    assert cfg.menu.enabled is False
+    assert cfg.menu.hora == (19, 0)
+    assert cfg.menu.page_url.endswith("menjador-escolar/")
+    assert cfg.menu.link_markers == ["basal", "menu"]
+    ids = [v.id for v in cfg.menu.variants]
+    assert ids == ["basal", "sense_porc"]
+    assert cfg.menu.variants[0].page == 0
+    assert cfg.menu.variants[1].page == 1
+    assert cfg.menu.variants[1].topic == "menu_sense_porc"
+    assert [v.id for v in cfg.menu.active_variants()] == ["basal", "sense_porc"]
+
+
+def test_menu_absent_is_disabled(tmp_path):
+    p = tmp_path / "config.yaml"
+    p.write_text(
+        "site:\n  base_url: 'https://x.test'\n  homepage: 'https://x.test/'\n"
+        "  feed: 'https://x.test/feed/'\n  calendari_page: 'https://x.test/cal/'\n",
+        encoding="utf-8",
+    )
+    cfg = load_config(p)
+    assert cfg.menu.enabled is False
+    assert cfg.menu.variants  # defaults presents però inactives
+    assert cfg.menu.active_variants()
+
+
+def test_menu_variant_disabled_and_custom_page(tmp_path):
+    p = tmp_path / "config.yaml"
+    p.write_text(
+        "site:\n  base_url: 'https://x.test'\n  homepage: 'https://x.test/'\n"
+        "  feed: 'https://x.test/feed/'\n  calendari_page: 'https://x.test/cal/'\n"
+        "menu:\n  enabled: true\n  hora: '18:30'\n  variants:\n"
+        "    - id: basal\n      page: 0\n      topic: menu_basal\n      enabled: false\n"
+        "    - id: sense_porc\n      page: 2\n      topic: menu_sense_porc\n",
+        encoding="utf-8",
+    )
+    cfg = load_config(p)
+    assert cfg.menu.enabled is True
+    assert cfg.menu.hora == (18, 30)
+    assert [v.id for v in cfg.menu.active_variants()] == ["sense_porc"]
+    assert cfg.menu.variants[1].page == 2
+
+
 def test_missing_file_raises(tmp_path):
     with pytest.raises(ConfigError):
         load_config(tmp_path / "nope.yaml")

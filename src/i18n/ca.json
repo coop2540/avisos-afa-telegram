@@ -13,5 +13,10 @@
   "carta.full_link": "Veure la carta completa (PDF)",
   "agenda.title": "Agenda de la setmana",
   "agenda.empty": "Aquesta setmana no hi ha cap acte programat.",
-  "agenda.full_link": "Veure la carta del mes"
+  "agenda.full_link": "Veure la carta del mes",
+  "menu.title": "Demà dinem {data}",
+  "menu.variant.basal": "Menú basal",
+  "menu.variant.sense_porc": "Sense porc",
+  "menu.pin_title": "Menú del mes (PDF)",
+  "menu.pin_link": "Obrir el menú del mes"
 }

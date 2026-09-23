@@ -7,7 +7,14 @@ from src.i18n import (
     normalize_language,
     translate,
 )
-from src.messages import calendari_message, carta_message, noticia_message, welcome_message
+from src.messages import (
+    calendari_message,
+    carta_message,
+    menu_dema_message,
+    menu_pin_message,
+    noticia_message,
+    welcome_message,
+)
 
 
 def test_default_language_is_catalan():
@@ -76,3 +83,24 @@ def test_calendari_message_localized():
 
 def test_messages_default_to_catalan():
     assert "Llegir més" in noticia_message("T", "s", "https://x.test")
+
+
+def test_menu_keys_present_and_localized():
+    for lang, expected in (("ca", "Demà dinem"), ("es", "Mañana comemos"), ("en", "Tomorrow")):
+        assert expected in translate("menu.title", lang, data="24/09")
+    assert translate("menu.variant.sense_porc", "ca") == "Sense porc"
+    assert translate("menu.variant.sense_porc", "es") == "Sin cerdo"
+    assert translate("no.existeix", "en") == "no.existeix"  # fallback a la clau
+
+
+def test_menu_messages_localized():
+    from datetime import date
+
+    ca = menu_dema_message(["CREMA DE CARBASSA", "PA"], date(2026, 9, 24), "basal", "ca")
+    es = menu_dema_message(["CREMA DE CARBASSA", "PA"], date(2026, 9, 24), "basal", "es")
+    assert "Demà dinem 24/09" in ca
+    assert "Mañana comemos 24/09" in es
+    assert "CREMA DE CARBASSA" in ca
+    pin = menu_pin_message("https://x.test/Basal.pdf", "ca")
+    assert "Menú del mes" in pin
+    assert "https://x.test/Basal.pdf" in pin

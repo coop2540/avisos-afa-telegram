@@ -26,6 +26,9 @@ en mica i perquè altres associacions vegin cap a on va.
 - ✅ **Aprovació de membres** semi-automàtica (avís a l'admin amb botons,
   filtres opt-in només de rebuig).
 - ✅ Missatge de **benvinguda + normes** (fins i tot fixat).
+- 📋 **Menú del menjador diari**: el menú de demà a les 19:00 als topics de cada
+  variant (basal / sense porc), amb salt de dies no lectius i missatge fixat amb
+  l'enllaç al PDF vigent.
 - 🟡 **Topics per curs actius**: decisio pendent (tants topics com cursos
   omple el grup; alternatives: per tipus o per cicle).
 - 💡 Enllaços d'invitació amb **caducitat** i rotació (ja s'usen; formalitzar).
@@ -95,3 +98,7 @@ transversal: multicentre, WhatsApp (si cal), plantilla reutilitzable
 - Integració amb el calendari del mòbil (iCal).
 - Traducció de la documentació del projecte (ara només en català).
 - Mètriques d'ús agregades i anònimes (quants avisos, sense perfilar ningú).
+- **Menú del menjador — xarxa de seguretat**: si el parser del PDF falla (canvi
+  de plantilla del centre), avisar l'admin per Telegram per revisar-lo a mà.
+  Es descarta fer servir IA per extreure els plats (risc d'inventar dades;
+  criteri ferm de la Fase D).

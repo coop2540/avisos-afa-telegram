@@ -26,6 +26,7 @@ class SendResult:
     status: int | None = None
     description: str | None = None
     dry_run: bool = False
+    message_id: int | None = None
 
 
 class TelegramClient:
@@ -108,7 +109,14 @@ class TelegramClient:
             if resp.status_code == 200:
                 body = _safe_json(resp)
                 if body.get("ok"):
-                    return SendResult(ok=True, status=200)
+                    msg_id = None
+                    result = body.get("result")
+                    if isinstance(result, dict) and "message_id" in result:
+                        try:
+                            msg_id = int(result["message_id"])
+                        except (TypeError, ValueError):
+                            msg_id = None
+                    return SendResult(ok=True, status=200, message_id=msg_id)
                 last = SendResult(
                     ok=False, status=200, description=str(body.get("description"))
                 )
@@ -133,6 +141,50 @@ class TelegramClient:
                 ok=False, status=resp.status_code, description=str(body.get("description"))
             )
             log.error("Error Telegram %s no reintentable: %s", resp.status_code, last.description)
+            return last
+
+        return last or SendResult(ok=False, description="esgotats els reintents")
+
+    def pin_message(self, message_id: int, *, thread_id: int | None = None) -> SendResult:
+        """Fixa un missatge al xat/topic (bot admin). No llança excepcions."""
+        if self.dry_run:
+            log.info("[DRY_RUN] pin a xat=%s topic=%s message_id=%s", self.chat_id, thread_id, message_id)
+            return SendResult(ok=True, dry_run=True, message_id=message_id)
+
+        if not self.token or not self.chat_id:
+            return SendResult(ok=False, description="Falta token o chat_id per fixar.")
+
+        url = f"{API_BASE}/bot{self.token}/pinChatMessage"
+        payload: dict[str, object] = {
+            "chat_id": self.chat_id,
+            "message_id": message_id,
+            "disable_notification": True,
+        }
+        if thread_id is not None:
+            payload["message_thread_id"] = thread_id
+
+        last: SendResult | None = None
+        for attempt in range(self.max_retries + 1):
+            try:
+                resp = self._client.post(url, json=payload, timeout=self.timeout)
+            except httpx.HTTPError as exc:
+                last = SendResult(ok=False, description=f"error de xarxa: {exc}")
+                log.warning("Pin Telegram fallit (intent %d): %s", attempt + 1, exc)
+                self._sleep(self.backoff_base * (attempt + 1))
+                continue
+
+            body = _safe_json(resp)
+            if resp.status_code == 200 and body.get("ok"):
+                return SendResult(ok=True, status=200, message_id=message_id)
+            if resp.status_code in RETRYABLE_STATUS:
+                last = SendResult(ok=False, status=resp.status_code, description="reintentable")
+                log.warning("Telegram %s en fixar (intent %d); reintent.", resp.status_code, attempt + 1)
+                self._sleep(self.backoff_base * (attempt + 1))
+                continue
+            last = SendResult(
+                ok=False, status=resp.status_code, description=str(body.get("description"))
+            )
+            log.error("Error Telegram %s en fixar: %s", resp.status_code, last.description)
             return last
 
         return last or SendResult(ok=False, description="esgotats els reintents")

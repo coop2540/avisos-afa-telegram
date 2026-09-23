@@ -27,6 +27,9 @@ Telegram, perquè les famílies no hagin de revisar la web a mà.
 - **Agenda de la carta**: extreu la taula d'activitats (Dia | Curs | Activitat)
   del PDF i publica la selecció del curs en sortir carta nova, més una agenda
   setmanal programada.
+- **Menú del menjador diari**: publica el menú de demà el dia anterior a les
+  19:00 als topics de cada variant (basal / sense porc), amb salt de dies no
+  lectius i un missatge fixat amb l'enllaç al PDF vigent.
 - **Només els administradors publiquen**; accés per invitació.
 - Estat de deduplicació persistent per no repetir avisos entre reinicis.
 
@@ -125,4 +128,4 @@ tasques. Si vols proposar alguna cosa, obre un *issue* o un *pull request*.
 
 ## Llicència
 
-[MIT](LICENSE) © SomTIC Cooperativa.
+[MIT](LICENSE) © SomTIC

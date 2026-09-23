@@ -6,6 +6,7 @@ duplicats. També cobreix la tolerància a errors d'una font.
 """
 
 import src.main as main_mod
+import src.menu_service as menu_mod
 from datetime import date, datetime, timezone
 
 from src.config import (
@@ -277,3 +278,63 @@ def test_weekly_agenda_disabled_does_nothing(monkeypatch, tmp_path):
     now = datetime(2026, 9, 23, 9, 0, tzinfo=timezone.utc)
     result = main_mod.run_cycle(cfg, state, FakeClient(), now=now)
     assert result.published == 0
+
+
+def test_menu_publishes_in_cycle(monkeypatch, tmp_path):
+    cfg = make_cfg(tmp_path)
+    from src.config import MenuConfig, MenuVariant
+
+    cfg.menu = MenuConfig(
+        enabled=True,
+        hora=(19, 0),
+        page_url="https://x.test/menjador/",
+        variants=[MenuVariant(id="basal", page=0, topic="menu_basal")],
+    )
+    cfg.timezone = "UTC"
+    cfg.telegram.topics["menu_basal"] = 24
+    state = State(baseline_done=True, carta_url="c1", cal_hash=hash_content("base"))
+    patch_sources(monkeypatch, items=[], carta="c1", cal="base")
+
+    monkeypatch.setattr(
+        menu_mod,
+        "fetch_menu_url",
+        lambda **_k: "https://x.test/Basal.pdf",
+    )
+    monkeypatch.setattr(
+        menu_mod,
+        "fetch_school_calendar",
+        lambda **_k: __import__("src.menu_calendar", fromlist=["SchoolCalendar"]).SchoolCalendar(
+            start=date(2026, 9, 8), end=date(2027, 6, 21)
+        ),
+    )
+    monkeypatch.setattr(
+        menu_mod, "load_menu", lambda url, target, page, user_agent: ["CREMA", "PA"]
+    )
+    client = FakeClient()
+    now = datetime(2026, 9, 23, 19, 0, tzinfo=timezone.utc)
+    result = main_mod.run_cycle(cfg, state, client, now=now)
+    assert result.published >= 1
+    assert state.menu_posted.get("basal") == "2026-09-24"
+    assert any(t == 24 for _txt, t in client.sent)
+
+
+def test_menu_fetch_error_does_not_crash_cycle(monkeypatch, tmp_path):
+    cfg = make_cfg(tmp_path)
+    from src.config import MenuConfig, MenuVariant
+
+    cfg.menu = MenuConfig(
+        enabled=True,
+        hora=(19, 0),
+        page_url="https://x.test/menjador/",
+        variants=[MenuVariant(id="basal", page=0, topic="menu_basal")],
+    )
+    state = State(baseline_done=True, carta_url="c1", cal_hash=hash_content("base"))
+    patch_sources(monkeypatch, items=[], carta="c1", cal="base")
+
+    def boom(**_k):
+        raise FetchError("menjador down")
+
+    monkeypatch.setattr(menu_mod, "fetch_menu_url", boom)
+    now = datetime(2026, 9, 23, 19, 0, tzinfo=timezone.utc)
+    result = main_mod.run_cycle(cfg, state, FakeClient(), now=now)
+    assert any(e.startswith("menu-url:") for e in result.errors)

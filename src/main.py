@@ -27,6 +27,7 @@ from .messages import (
     noticia_message,
     welcome_message,
 )
+from .menu_service import maybe_publish_menu
 from .parse_carta import load_carta
 from .scheduler import next_interval_minutes
 from .state import State
@@ -274,6 +275,15 @@ def run_cycle(
     weekly = maybe_publish_weekly(cfg, state, client, now)
     if weekly:
         result.published += weekly
+        changed = True
+
+    # --- Menú del menjador (si toca) ---
+    menu_res = maybe_publish_menu(cfg, state, client, now)
+    if menu_res.errors:
+        result.errors.extend(menu_res.errors)
+    if menu_res.published or menu_res.failed or menu_res.pin_refreshed:
+        result.published += menu_res.published
+        result.failed += menu_res.failed
         changed = True
 
     if changed:

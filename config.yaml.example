@@ -67,6 +67,8 @@ telegram:
     carta: null
     calendari: null
     agenda: null
+    menu_basal: null
+    menu_sense_porc: null
 
 first_run:
   # Si false (recomanat), la primera execució només desa la línia base sense
@@ -85,3 +87,34 @@ agenda:
     enabled: true
     dia: 1        # 1=dilluns … 7=diumenge
     hora: "08:00"
+
+menu:
+  # Menú del menjador: publica el menú de demà el dia anterior a l'hora indicada,
+  # als topics per variant. L'URL del PDF es resol dinàmicament de la pàgina del
+  # menjador (canvia cada mes). Vegeu specs/daily-menu.
+  enabled: false
+  hora: "19:00"          # hora local de publicació (dia anterior)
+  # Pàgina del menjador on es resol l'enllaç del PDF del menú.
+  page_url: "https://agora.xtec.cat/escolaelisabadia/serveis/menjador-escolar/"
+  # Fragments d'href de l'enllaç del PDF del menú (les àncores no tenen text).
+  link_markers:
+    - "basal"
+    - "menu"
+  # Fragments d'href que NO són el menú (carta, calendari, etc.).
+  fallback_href_excludes:
+    - "carta"
+    - "calendari"
+    - "funcionament"
+    - "preus"
+    - "que-cal-portar"
+  # Variants del menú: cada una és una pàgina del PDF i un topic.
+  # IMPORTANT: `page` és l'índex 0-based de la pàgina del PDF (0=basal, 1=sense porc).
+  variants:
+    - id: basal
+      page: 0
+      topic: menu_basal
+      enabled: true
+    - id: sense_porc
+      page: 1
+      topic: menu_sense_porc
+      enabled: true

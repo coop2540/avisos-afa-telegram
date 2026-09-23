@@ -116,6 +116,41 @@ class AgendaConfig:
 
 
 @dataclass
+class MenuVariant:
+    """Una variant del menú (p. ex. basal, sense porc).
+
+    `page` és l'índex de pàgina del PDF del menú (0-based: 0=basal, 1=sense porc)
+    i s'ha de documentar a `config.yaml.example`. `topic` és la clau de
+    `telegram.topics` d'aquesta variant; si és None cau al topic per defecte.
+    """
+
+    id: str
+    page: int = 0
+    topic: str | None = None
+    enabled: bool = True
+
+
+@dataclass
+class MenuConfig:
+    enabled: bool = False
+    hora: tuple[int, int] = (19, 0)
+    page_url: str | None = None
+    link_markers: list[str] = field(default_factory=lambda: ["basal", "menu"])
+    fallback_href_excludes: list[str] = field(
+        default_factory=lambda: ["carta", "calendari", "funcionament", "preus", "que-cal-portar"]
+    )
+    variants: list[MenuVariant] = field(
+        default_factory=lambda: [
+            MenuVariant(id="basal", page=0, topic="menu_basal"),
+            MenuVariant(id="sense_porc", page=1, topic="menu_sense_porc"),
+        ]
+    )
+
+    def active_variants(self) -> list[MenuVariant]:
+        return [v for v in self.variants if v.enabled]
+
+
+@dataclass
 class Config:
     site: SiteConfig
     rss: RssConfig
@@ -124,6 +159,7 @@ class Config:
     telegram: TelegramConfig
     first_run: FirstRunConfig
     agenda: AgendaConfig = field(default_factory=AgendaConfig)
+    menu: MenuConfig = field(default_factory=MenuConfig)
     language: str = DEFAULT_LANG
     timezone: str = "Europe/Madrid"
     state_path: Path = Path(DEFAULT_STATE_PATH)
@@ -277,6 +313,40 @@ def load_config(config_path: str | Path | None = None) -> Config:
         weekly_time=_parse_hhmm(setmanal_raw.get("hora")),
     )
 
+    menu_raw = _section(raw, "menu")
+    variants_raw = menu_raw.get("variants")
+    if variants_raw is None:
+        variants = MenuConfig().variants
+    elif not isinstance(variants_raw, list):
+        raise ConfigError("'menu.variants' ha de ser una llista de variants.")
+    else:
+        variants = []
+        for i, v in enumerate(variants_raw):
+            if not isinstance(v, dict) or not v.get("id"):
+                raise ConfigError(f"'menu.variants[{i}]' ha de ser un mapa amb 'id'.")
+            variants.append(
+                MenuVariant(
+                    id=str(v["id"]),
+                    page=int(v.get("page", 0)),
+                    topic=(str(v["topic"]) if v.get("topic") else None),
+                    enabled=_as_bool(v.get("enabled"), True),
+                )
+            )
+    menu = MenuConfig(
+        enabled=_as_bool(menu_raw.get("enabled"), False),
+        hora=_parse_hhmm(menu_raw.get("hora"), (19, 0)),
+        page_url=(str(menu_raw["page_url"]) if menu_raw.get("page_url") else None),
+        link_markers=[str(m) for m in (menu_raw.get("link_markers") or ["basal", "menu"])],
+        fallback_href_excludes=[
+            str(m)
+            for m in (
+                menu_raw.get("fallback_href_excludes")
+                or ["carta", "calendari", "funcionament", "preus", "que-cal-portar"]
+            )
+        ],
+        variants=variants,
+    )
+
     language = normalize_language(os.environ.get("LANGUAGE") or raw.get("language"))
 
     tz_name = str(raw.get("timezone") or os.environ.get("TZ") or "Europe/Madrid")
@@ -291,6 +361,7 @@ def load_config(config_path: str | Path | None = None) -> Config:
         telegram=telegram,
         first_run=first_run,
         agenda=agenda,
+        menu=menu,
         language=language,
         timezone=tz_name,
         state_path=state_path,

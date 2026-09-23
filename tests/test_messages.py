@@ -7,6 +7,8 @@ from src.messages import (
     calendari_message,
     carta_filtrada_message,
     carta_message,
+    menu_dema_message,
+    menu_pin_message,
     noticia_message,
     plain_summary,
     welcome_message,
@@ -112,3 +114,34 @@ def test_agenda_message_empty():
 def test_agenda_message_localized():
     msg = agenda_message([], date(2026, 9, 21), date(2026, 9, 27), None, "es")
     assert "Agenda de la semana" in msg
+
+
+def test_menu_dema_message_has_date_plates_and_no_link():
+    msg = menu_dema_message(
+        ["CREMA DE CARBASSA", "MAGRA DE PORC", "PA INTEGRAL"],
+        date(2026, 9, 24),
+        "basal",
+    )
+    assert "Demà dinem 24/09" in msg
+    assert "CREMA DE CARBASSA" in msg
+    assert "PA INTEGRAL" in msg
+    assert "href=" not in msg  # sense enllaç al PDF
+    assert "Menú basal" in msg
+
+
+def test_menu_dema_message_localized_es():
+    msg = menu_dema_message(["PA"], date(2026, 9, 24), "sense_porc", "es")
+    assert "Mañana comemos 24/09" in msg
+    assert "Sin cerdo" in msg
+
+
+def test_menu_dema_message_escapes_html():
+    msg = menu_dema_message(["<script>alert(1)</script>"], date(2026, 9, 24), "basal")
+    assert "<script>" not in msg
+    assert "&lt;script&gt;" in msg
+
+
+def test_menu_pin_message_has_link():
+    msg = menu_pin_message("https://x.test/Basal-escolar_merged.pdf")
+    assert "Menú del mes (PDF)" in msg
+    assert 'href="https://x.test/Basal-escolar_merged.pdf"' in msg
