@@ -1,0 +1,12 @@
+# Secrets i estat local — MAI al repositori
+.env
+.env.*
+!.env.example
+config.yaml
+state/
+*.pyc
+__pycache__/
+.venv/
+venv/
+.pytest_cache/
+*.log

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+	xmlns:content="http://purl.org/rss/1.0/modules/content/"
+	xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel>
+	<title>Escola Elisa Badia</title>
+	<link>https://agora.xtec.cat/escolaelisabadia</link>
+	<description>50 anys fent escola</description>
+	<language>ca</language>
+	<item>
+		<title>Reunió de famílies d'I4</title>
+		<link>https://agora.xtec.cat/escolaelisabadia/general/reunio-families-i4/</link>
+		<dc:creator><![CDATA[Eugeni]]></dc:creator>
+		<pubDate>Fri, 04 Sep 2026 12:00:00 +0000</pubDate>
+		<category><![CDATA[I4]]></category>
+		<category><![CDATA[Infantil]]></category>
+		<guid isPermaLink="false">https://agora.xtec.cat/escolaelisabadia/?p=9001</guid>
+		<description><![CDATA[<p>Reunió de famílies d'I4 el dia 15 a les 15h.</p>]]></description>
+	</item>
+	<item>
+		<title>Sortida de 3r al zoo</title>
+		<link>https://agora.xtec.cat/escolaelisabadia/general/sortida-3r-zoo/</link>
+		<pubDate>Fri, 04 Sep 2026 12:00:00 +0000</pubDate>
+		<category><![CDATA[3r]]></category>
+		<category><![CDATA[Primària]]></category>
+		<guid isPermaLink="false">https://agora.xtec.cat/escolaelisabadia/?p=9002</guid>
+		<description><![CDATA[<p>L'alumnat de 3r visita el zoo.</p>]]></description>
+	</item>
+	<item>
+		<title>Festa de la ciència de 6è</title>
+		<link>https://agora.xtec.cat/escolaelisabadia/general/festa-ciencia/</link>
+		<pubDate>Fri, 04 Sep 2026 12:00:00 +0000</pubDate>
+		<category><![CDATA[6è]]></category>
+		<guid isPermaLink="false">https://agora.xtec.cat/escolaelisabadia/?p=9003</guid>
+		<description><![CDATA[<p>Experimentem amb la ciència.</p>]]></description>
+	</item>
+	<item>
+		<title>Portes obertes 2026</title>
+		<link>https://agora.xtec.cat/escolaelisabadia/general/portes-obertes/</link>
+		<pubDate>Fri, 04 Sep 2026 12:00:00 +0000</pubDate>
+		<category><![CDATA[Portada]]></category>
+		<category><![CDATA[General]]></category>
+		<guid isPermaLink="false">https://agora.xtec.cat/escolaelisabadia/?p=9004</guid>
+		<description><![CDATA[<p>Vine a conèixer l'escola.</p>]]></description>
+	</item>
+	<item>
+		<title>Agermanament de la classe de les abelles</title>
+		<link>https://agora.xtec.cat/escolaelisabadia/general/agermanament-abelles/</link>
+		<pubDate>Fri, 04 Sep 2026 12:00:00 +0000</pubDate>
+		<category><![CDATA[I4B]]></category>
+		<guid isPermaLink="false">https://agora.xtec.cat/escolaelisabadia/?p=9005</guid>
+		<description><![CDATA[<p>Els infants d'I4B fan agermanament.</p>]]></description>
+	</item>
+</channel>
+</rss>

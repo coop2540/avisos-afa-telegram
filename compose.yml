@@ -1,0 +1,27 @@
+# Servei d'avisos AFA — Escola Elisa Badia
+#
+# Ús:
+#   1. cp config.yaml.example config.yaml   (ajusta chat_id i topics)
+#   2. cp .env.example .env                 (posa TELEGRAM_BOT_TOKEN)
+#   3. docker compose up -d
+#
+# Vegeu docs/transparencia.md.
+
+services:
+  avisos:
+    build: .
+    image: afa-elisabadia-avisos:local
+    container_name: afa-elisabadia-avisos
+    restart: unless-stopped
+    # Executa com l'usuari del host perquè el volum state/ no quedi com a root.
+    # Ajusta PUID/PGID al teu usuari (normalment 1000) si cal.
+    user: "${PUID:-1000}:${PGID:-1000}"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      CONFIG_PATH: /app/config.yaml
+      STATE_PATH: /app/state/state.json
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+      - ./state:/app/state

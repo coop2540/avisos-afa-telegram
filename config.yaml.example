@@ -1,0 +1,52 @@
+# Configuració del servei d'avisos AFA — Escola Elisa Badia
+# Copia a `config.yaml` i ajusta. No conté secrets (aquests van a `.env`).
+
+site:
+  base_url: "https://agora.xtec.cat/escolaelisabadia"
+  homepage: "https://agora.xtec.cat/escolaelisabadia/"
+  feed: "https://agora.xtec.cat/escolaelisabadia/feed/"
+  calendari_page: "https://agora.xtec.cat/escolaelisabadia/lescola/calendari-del-curs/"
+  user_agent: "afa-elisabadia-avisos/0.1 (servei d'avisos AFA; contacte: AFA)"
+
+rss:
+  # Categories del blog que es publiquen (comparació sense distingir majúscules).
+  # Fase A: curs objectiu (I4) + genèriques del centre.
+  include_categories:
+    - "I4"
+    - "Portada"
+    - "General"
+  # Límit d'elements publicats per cicle per no fer un esclat si n'hi ha molts.
+  max_items_per_cycle: 10
+
+carta:
+  # Fragments de text de l'enllaç a la portada que identifiquen la carta del mes.
+  link_text_markers:
+    - "carta del mes"
+    - "consulteu la carta"
+  # Alternativa: si cap text coincideix, accepta un href que contingui això i acabi en .pdf
+  fallback_href_contains:
+    - "carta-mes"
+    - "carta-mes-"
+
+poll:
+  # Sondeig adaptatiu (minuts)
+  base_minutes: 60          # interval normal
+  hot_minutes: 20           # després de detectar novetat
+  hot_window_minutes: 180   # durant quant de temps es manté "calent"
+  calm_minutes: 240         # quan fa dies que no hi ha res (4h)
+  quiet_after_days: 7       # dies sense novetat per passar a mode calma
+
+telegram:
+  # Identificador del grup/canal de destí (NO és secret).
+  chat_id: null
+  # Topics (message_thread_id) per origen. null = topic general / sense topic.
+  topics:
+    default: null
+    rss: null
+    carta: null
+    calendari: null
+
+first_run:
+  # Si false (recomanat), la primera execució només desa la línia base sense
+  # publicar l'històric. Si true, publica un únic avís de benvinguda.
+  publish_welcome: false
