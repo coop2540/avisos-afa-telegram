@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import os
 import tempfile
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -44,20 +44,7 @@ class State:
 
     # --- càrrega / guardat -------------------------------------------------
     @classmethod
-    def load(cls, path: str | Path) -> "State":
-        """Carrega l'estat. Si no existeix, retorna un estat buit (primera execució)."""
-        p = Path(path)
-        if not p.exists():
-            log.info("Estat inexistent a %s: primera execució (línia base).", p)
-            return cls()
-        try:
-            data = json.loads(p.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError) as exc:
-            log.error("No s'ha pogut llegir l'estat %s (%s); es comença de nou.", p, exc)
-            return cls()
-        if not isinstance(data, dict):
-            log.error("Estat %s invàlid; es comença de nou.", p)
-            return cls()
+    def _from_data(cls, data: dict) -> "State":
         return cls(
             rss_guids=list(data.get("rss_guids") or []),
             carta_url=data.get("carta_url"),
@@ -74,6 +61,51 @@ class State:
             join_requests=dict(data.get("join_requests") or {}),
             version=int(data.get("version", STATE_VERSION)),
         )
+
+    @classmethod
+    def load(cls, path: str | Path) -> "State":
+        """Carrega l'estat. Si no existeix, retorna un estat buit (primera execució)."""
+        p = Path(path)
+        if not p.exists():
+            log.info("Estat inexistent a %s: primera execució (línia base).", p)
+            return cls()
+        try:
+            data = json.loads(p.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            log.error("No s'ha pogut llegir l'estat %s (%s); es comença de nou.", p, exc)
+            return cls()
+        if not isinstance(data, dict):
+            log.error("Estat %s invàlid; es comença de nou.", p)
+            return cls()
+        return cls._from_data(data)
+
+    def reload(self, path: str | Path) -> bool:
+        """Recarrega els camps des de disc mantenint la identitat de l'objecte.
+
+        Permet que un procés extern (`--once`) hagi actualitzat l'estat i el
+        bucle principal ho vegi sense reiniciar (evita duplicats). `join_requests`
+        NO es toca: només el fil d'aprovació el muta i desa de seguida, així que
+        el valor en memòria ja és el més fresc. Retorna False si el fitxer no
+        existeix o és corrupte (es manté l'estat actual en memòria).
+        """
+        p = Path(path)
+        if not p.exists():
+            log.warning("Estat extern inexistent a %s; es manté l'estat en memòria.", p)
+            return False
+        try:
+            data = json.loads(p.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            log.error("No s'ha pogut recarregar l'estat %s (%s); es manté en memòria.", p, exc)
+            return False
+        if not isinstance(data, dict):
+            log.error("Estat %s invàlid; es manté l'estat en memòria.", p)
+            return False
+        fresh = self._from_data(data)
+        for f in fields(self):
+            if f.name == "join_requests":
+                continue
+            setattr(self, f.name, getattr(fresh, f.name))
+        return True
 
     def save(self, path: str | Path) -> None:
         """Guarda l'estat de forma atòmica (temp al mateix directori + replace)."""

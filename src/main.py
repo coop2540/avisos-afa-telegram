@@ -342,6 +342,9 @@ def run_forever(cfg: Config) -> None:
                 res.errors or "-",
             )
         while True:
+            # Recarrega des de disc: un procés extern (--once) pot haver
+            # publicat mentre dormíem; sense això es duplicaria (vegeu D3).
+            state.reload(cfg.state_path)
             res = run_cycle(cfg, state, client)
             log.info(
                 "Cicle: publicats=%d fallits=%d errors=%s",
@@ -349,7 +352,9 @@ def run_forever(cfg: Config) -> None:
                 res.failed,
                 res.errors or "-",
             )
-            minutes = next_interval_minutes(state, cfg.poll)
+            minutes = next_interval_minutes(
+                state, cfg.poll, menu=cfg.menu, tz=_local_tz(cfg)
+            )
             log.info("Proper sondeig en %d minuts.", minutes)
             time.sleep(minutes * 60)
 

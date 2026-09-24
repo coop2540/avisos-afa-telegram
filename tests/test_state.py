@@ -96,3 +96,57 @@ def test_old_state_without_menu_keys(tmp_path):
     assert state.menu_slot_done_on is None
     assert state.menu_posted == {}
     assert state.menu_pin_ids == {}
+
+
+# --- reload (procés extern, ex. --once) -----------------------------------
+
+
+def test_reload_picks_up_external_write(tmp_path):
+    path = tmp_path / "state.json"
+    mine = State(baseline_done=True)
+    mine.save(path)
+
+    ext = State.load(path)  # un altre procés publica i desa
+    ext.menu_posted = {"basal": "2026-09-25"}
+    ext.menu_slot_done_on = "2026-09-24"
+    ext.save(path)
+
+    assert mine.reload(path) is True
+    assert mine.menu_posted == {"basal": "2026-09-25"}
+    assert mine.menu_slot_done_on == "2026-09-24"
+    assert mine.baseline_done is True
+
+
+def test_reload_preserves_join_requests(tmp_path):
+    path = tmp_path / "state.json"
+    mine = State(baseline_done=True)
+    mine.remember_join(42, "notified")
+    mine.save(path)
+
+    # Extern esborra join_requests del fitxer: en memòria no s'ha de perdre
+    # (el fil d'aprovació comparteix aquest objecte).
+    ext = State.load(path)
+    ext.join_requests = {}
+    ext.rss_guids = ["nou"]
+    ext.save(path)
+
+    assert mine.reload(path) is True
+    assert mine.join_requests["42"]["status"] == "notified"
+    assert mine.rss_guids == ["nou"]
+
+
+def test_reload_missing_file_keeps_memory(tmp_path):
+    path = tmp_path / "state.json"
+    mine = State(rss_guids=["a"], baseline_done=True)
+    assert mine.reload(path) is False
+    assert mine.rss_guids == ["a"]
+    assert mine.baseline_done is True
+
+
+def test_reload_corrupt_keeps_memory(tmp_path):
+    path = tmp_path / "state.json"
+    mine = State(rss_guids=["a"], baseline_done=True)
+    path.write_text("{corrupte", encoding="utf-8")
+    assert mine.reload(path) is False
+    assert mine.rss_guids == ["a"]
+    assert mine.baseline_done is True

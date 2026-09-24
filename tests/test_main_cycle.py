@@ -338,3 +338,70 @@ def test_menu_fetch_error_does_not_crash_cycle(monkeypatch, tmp_path):
     now = datetime(2026, 9, 23, 19, 0, tzinfo=timezone.utc)
     result = main_mod.run_cycle(cfg, state, FakeClient(), now=now)
     assert any(e.startswith("menu-url:") for e in result.errors)
+
+
+def test_run_forever_sees_external_state_write(monkeypatch, tmp_path):
+    """Bug 24/09: un procés extern que desa estat entre cicles no duplica.
+
+    El bucle principal ha de recarregar `state` abans de cada cicle; si no,
+    republica el que l'altre procés ja havia publicat (--once a les 19:33
+    seguit del cicle programat a les 19:41).
+    """
+    cfg = make_cfg(tmp_path)
+
+    # Cicle 1: coneix g1/g2. Cicle 2: arriba g3 (dedupejat per l'extern).
+    calls = {"rss": 0}
+
+    def fake_rss(*_a, **_k):
+        calls["rss"] += 1
+        guids = ["g1", "g2"] + (["g3"] if calls["rss"] >= 2 else [])
+        return [item(g, f"Notícia {g}", f"https://x.test/{g}") for g in guids]
+
+    monkeypatch.setattr(main_mod, "fetch_rss", fake_rss)
+    monkeypatch.setattr(main_mod, "fetch_carta_url", lambda **_k: "c1")
+    monkeypatch.setattr(
+        main_mod, "fetch_calendari", lambda **_k: CalendariContent(normalized_text="base")
+    )
+
+    State(
+        rss_guids=["g1", "g2"],
+        baseline_done=True,
+        carta_url="c1",
+        cal_hash=hash_content("base"),
+    ).save(cfg.state_path)
+
+    client = FakeClient()
+
+    class _CtxClient:
+        def __init__(self, inner):
+            self._inner = inner
+
+        def __enter__(self):
+            return self._inner
+
+        def __exit__(self, *exc):
+            return False
+
+    monkeypatch.setattr(main_mod, "TelegramClient", lambda *a, **k: _CtxClient(client))
+
+    sleeps = {"n": 0}
+
+    def fake_sleep(_secs):
+        sleeps["n"] += 1
+        if sleeps["n"] == 1:
+            ext = State.load(cfg.state_path)  # un altre procés (--once)
+            ext.remember_rss("g3")
+            ext.save(cfg.state_path)
+            return
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(main_mod.time, "sleep", fake_sleep)
+
+    try:
+        main_mod.run_forever(cfg)
+    except KeyboardInterrupt:
+        pass
+
+    assert sleeps["n"] == 2
+    # Sense reload, el cicle 2 publicaria g3: el reload ho evita.
+    assert client.sent == []

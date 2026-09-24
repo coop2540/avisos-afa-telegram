@@ -54,3 +54,10 @@
 - [x] 9.2 Reiniciar contenedor; verificar als logs que resol el PDF del menjador i que no publica fora de slot
 - [x] 9.3 E2E: esperar un 19:00 (o forçar cicle amb data simulada en local) → verificar missatge \"Demà dinem\" al topic 24 (basal) i al 27 (sense porc) amb els plats reals del PDF, i pin amb l'enllaç vigent als dos topics
 - [x] 9.4 Verificar salt: simular demà = dissabte (o esperar divendres) → cap missatge; reiniciar contenedor el mateix vespre → cap duplicat de `menu_posted`
+
+## 10. Correccions post-desplegament (24/09/2026)
+
+- [x] 10.1 `State.reload(path)`: recarrega in-place des de disc preservant `join_requests` (només el fil d'aprovació el muta i desa); False si falta/corrupte (es manté memòria); `run_forever` la crida abans de cada cicle → un `--once` extern ja no provoca duplicats (incidència 19:33 + 19:41)
+- [x] 10.2 Scheduler slot-aware: `next_interval_minutes(menu=…, tz=…)` + `next_menu_deadline` → l'interval s'acosta a l'slot de les 19:00; slot passat pendent → reintent `SLOT_RETRY_MINUTES` (10 min); menú deshabilitat / sense tz → comportament anterior intacte
+- [x] 10.3 Tests: `reload` (escriptor extern, `join_requests` preservat, missing/corrupte); scheduler slot (abans/lluny/resolt/passat, hot/calm, tz Madrid, mitjanit); integració `run_forever` amb escriptor extern (regresiu: falla sense el fix)
+- [x] 10.4 `openspec validate` + `pytest` en blau; amender design.md D3 i risc de deriva; desplegar contenedor i verificar logs
