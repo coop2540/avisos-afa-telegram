@@ -38,10 +38,7 @@ Telegram, perquè les famílies no hagin de revisar la web a mà.
 
 ## Com funciona
 
-Recorregut d'un avís, de la web del centre fins als topics del grup. GitHub
-renderitza el primer diagrama; el segon és la mateixa idea en text pur.
-
-### Diagrama Mermaid
+Recorregut d'un avís, de la web del centre fins als topics del grup:
 
 ```mermaid
 flowchart TD
@@ -105,51 +102,6 @@ flowchart TD
     PUB -.-> STATE
     LOOP -.-> ADMIN
     ADMIN -.-> tg
-```
-
-### Diagrama ASCII
-
-```text
-Web pública del centre (només lectura)
-├── Feed RSS
-├── Pàgina d'inici → enllaç de la carta mensual
-├── Pàgina de calendari
-└── Pàgina del menjador → PDF del menú (text o imatge pura)
-
-        │  sondeig adaptatiu: 60 min base, 20 min si hi ha
-        │  novetat, 240 min en calma; s'acosta al slot 19:00
-        ▼
-  ┌── cicle de sondeig                                      ┐
-  │  1. Notícies RSS ............... dedup per GUID         │
-  │  2. Carta nova ................. dedup per URL          │
-  │  3. Canvi de calendari ......... dedup per hash         │
-  │  4. Agenda setmanal ............ dilluns 08:00          │
-  │  5. Menú de demà ............... slot diari 19:00 ──┐   │
-  └─────────────────────────────────────────────────────│───┘
-
-        ▼
-  ┌── menú: del PDF als plats                               ┐
-  │  PDF amb capa de texte?                                 │
-  │  sí → pdfplumber (rejilla dilluns-divendres)            │
-  │  no → visió local Ollama (qwen3-vl): segell + cel·la    │
-  │  Dia imprès dins de D-1, D o D?                         │
-  │  OK → blocs de plats       KO → no es publica; reintent │
-  └─────────────────────────────────────────────────────────┘
-
-        ▼
-  state/state.json · deduplicació · línia base
-                   · memòria variant → pàgina
-
-        │  ja publicat?  →  sí: no publica res
-        ▼ nou
-  ┌── Telegram Bot API → grup amb topics                    ┐
-  │  notícies · carta · calendari · agenda                  │
-  │  menú basal · menú sense porc (pin amb l'enllaç al PDF) │
-  └─────────────────────────────────────────────────────────┘
-
-  Fil paral·lel (mateix procés): aprovació de membres
-    sol·licitud d'unió → long polling → avís a l'admin
-    amb botons → aprova o rebutja → resposta a la família
 ```
 
 ## Requisits
