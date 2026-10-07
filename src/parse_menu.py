@@ -12,6 +12,7 @@ errates: ex. el dijous 24 imprès com a «25»), sinó pel **dilluns de la fila 
 
 from __future__ import annotations
 
+import math
 import re
 from dataclasses import dataclass, field
 from datetime import date, timedelta
@@ -160,14 +161,14 @@ def build_grid(
 
 
 def _resolve_monday(day: int, month: int | None, year: int | None) -> date | None:
-    if month is None or year is None:
+    """Dilluns a partir del seu dia del mes; `day` pot ser ≤ 0 (setmana
+    parcial de principi de mes: p. ex. 1 i 2 de dijous/divendres → -2)."""
+    if month is None or year is None or not 1 <= month <= 12:
         return None
-    for m, y in ((month, year), (month - 1, year), (month + 1, year)):
-        try:
-            return date(y, m, day)
-        except ValueError:
-            continue
-    return None
+    try:
+        return date(year, month, 1) + timedelta(days=day - 1)
+    except (ValueError, OverflowError):
+        return None
 
 
 def cell_words(grid: MenuGrid, target: date) -> list[dict] | None:
@@ -183,7 +184,11 @@ def cell_words(grid: MenuGrid, target: date) -> list[dict] | None:
         if monday.isocalendar()[:2] != (target - timedelta(days=target.weekday())).isocalendar()[:2]:
             continue
         col = target.weekday()
-        lo, hi = grid.columns[col], grid.columns[col + 1]
+        # Límits de columna: el primer i l'últim s'obren fins al marge de la
+        # pàgina perquè el contingut de la cel·la pot començar abans que la
+        # capçalera (p. ex. «LLUÇ» a la columna de dilluns).
+        lo = 0.0 if col == 0 else grid.columns[col]
+        hi = math.inf if col == len(grid.columns) - 2 else grid.columns[col + 1]
         words = [
             w
             for w in grid.words
@@ -302,18 +307,55 @@ def parse_menu_pdf(
     *,
     page: int = 0,
     source_url: str | None = None,
+    vision=None,
+    variant_id: str | None = None,
+    page_cache: dict[str, int] | None = None,
 ) -> list[str] | None:
-    """Interpreta el PDF del menú i retorna els plats de `target` (o None)."""
+    """Interpreta el PDF del menú i retorna els plats de `target` (o None).
+
+    Primera via: extracció determinista de texte (preferida). Si el PDF no té
+    capa de texte (o no se'n pot reconstruir la rejilla) i hi ha `vision`, es
+    transcriu la cel·la amb visió local. La distinció clau: `None` vol dir
+    *dia resolt sense cel·la* (no es reintenta); una fallada del motor de visió
+    llança `VisionError` i el dia queda pendent (canvi menu-vision, D8).
+    """
+    words: list[dict] | None = None
     try:
         with pdfplumber.open(BytesIO(data)) as pdf:
-            if page < 0 or page >= len(pdf.pages):
-                log.warning("Pàgina %d fora del PDF del menú (%d pàgines).", page, len(pdf.pages))
-                return None
-            words = pdf.pages[page].extract_words()
+            if 0 <= page < len(pdf.pages):
+                words = pdf.pages[page].extract_words()
+            else:
+                log.warning(
+                    "Pàgina %d fora del PDF del menú (%d pàgines).", page, len(pdf.pages)
+                )
     except Exception as exc:  # PDF il·legible o estructura desconeguda
         log.error("No s'ha pogut llegir el PDF del menú: %s", exc)
-        return None
-    return plates_for_date(words, target, source_url=source_url)
+
+    if words:
+        grid = build_grid(words, source_url=source_url)
+        if grid is not None:
+            cell = cell_words(grid, target)
+            if cell is None:
+                return None  # resolt: el dia no té fila/columna a la rejilla
+            return cell_blocks(cell) or None
+        log.warning("Text present però sense capçaleres de rejilla; es prova la visió.")
+
+    if vision is not None:
+        return vision.extract_plates(
+            data,
+            target,
+            variant_id=variant_id,
+            fallback_page=page,
+            page_cache=page_cache,
+        )
+
+    if not words:
+        log.warning(
+            "El PDF del menú no té capa de texte i la visió és desactivada; "
+            "no es publica res per al %s.",
+            target,
+        )
+    return None
 
 
 def load_menu(
@@ -322,7 +364,18 @@ def load_menu(
     *,
     page: int = 0,
     user_agent: str,
+    vision=None,
+    variant_id: str | None = None,
+    page_cache: dict[str, int] | None = None,
 ) -> list[str] | None:
     """Descarrega el PDF del menú i retorna els plats de `target` (o None)."""
     data = fetch_bytes(url, user_agent=user_agent)
-    return parse_menu_pdf(data, target, page=page, source_url=url)
+    return parse_menu_pdf(
+        data,
+        target,
+        page=page,
+        source_url=url,
+        vision=vision,
+        variant_id=variant_id,
+        page_cache=page_cache,
+    )

@@ -16,6 +16,7 @@ from src.config import (
 )
 from src.menu_calendar import SchoolCalendar
 from src.menu_service import maybe_publish_menu, menu_target_date, should_post_menu
+from src.menu_vision import VisionError
 from src.state import State
 from src.telegram_out import SendResult
 
@@ -325,3 +326,74 @@ def test_slot_done_for_non_school_day(monkeypatch):
                              menu_url="https://x.test/Basal.pdf")
     assert res.published == 0
     assert state.menu_slot_done_on == "2026-09-25"
+
+
+# --- visió: fallada del motor vs cel·la buida (canvi menu-vision) ------------
+
+
+def test_vision_error_leaves_day_pending_and_retries(monkeypatch):
+    """Fallada d'Ollama: no es marca `menu_posted` i el cicle següent reintenta."""
+    cfg = _cfg()
+    cfg.menu.vision.enabled = True
+    state = State()
+    client = FakeClient()
+
+    def boom(*a, **k):
+        raise VisionError("Ollama caigut")
+
+    monkeypatch.setattr(menu_mod, "load_menu", boom)
+    now = datetime(2026, 9, 23, 19, 0)
+    res = _run(cfg, state, client, now)
+
+    assert res.published == 0
+    assert any("visió" in e for e in res.errors)
+    assert state.menu_posted == {}  # resoldre → reintent
+    assert state.menu_slot_done_on is None
+    # Es publica l'enllaç del PDF, però NO el menú del dia (🍽️).
+    assert not any(text.startswith("🍽️") for text, _t in client.sent)
+
+    # Cicle següent amb el motor en marxa: es publica.
+    monkeypatch.setattr(menu_mod, "load_menu", lambda *a, **k: ["PLAT"])
+    res2 = _run(cfg, state, client, now)
+    assert res2.published == 2
+    assert state.menu_posted == {"basal": "2026-09-24", "sense_porc": "2026-09-24"}
+
+
+def test_empty_cell_with_vision_is_resolved_not_retried(monkeypatch):
+    """Cel·la buida (None): es resol el slot sense publicar ni reintentar."""
+    cfg = _cfg()
+    cfg.menu.vision.enabled = True
+    state = State()
+    client = FakeClient()
+    monkeypatch.setattr(menu_mod, "load_menu", lambda *a, **k: None)
+
+    res = _run(cfg, state, client, datetime(2026, 9, 23, 19, 0))
+    assert res.published == 0
+    assert res.errors == []
+    assert state.menu_posted == {}
+    assert state.menu_slot_done_on == "2026-09-23"  # resolt: cap reintent
+
+
+def test_page_cache_is_state_backed_and_prunes_old_urls(monkeypatch):
+    """La memòria variant→pàgina viu a l'estat i es poda per URL antiga."""
+    captured = []
+
+    def fake_load(url, target, *, page, user_agent, vision, variant_id, page_cache, **kw):
+        captured.append((url, variant_id, page_cache))
+        page_cache.setdefault(variant_id, page)  # simula detecció del segell
+        return ["PLAT"]
+
+    cfg = _cfg()
+    state = State()
+    state.menu_variant_pages = {"https://x.test/2026/09/vell.pdf": {"basal": 7}}
+    client = FakeClient()
+    monkeypatch.setattr(menu_mod, "load_menu", fake_load)
+
+    url = "https://x.test/Basal.pdf"
+    _run(cfg, state, client, datetime(2026, 9, 23, 19, 0), menu_url=url)
+
+    assert [vid for _u, vid, _c in captured] == ["basal", "sense_porc"]
+    # Ambdues variants comparteixen el mateix dict, el de l'estat.
+    assert all(c is state.menu_variant_pages[url] for _u, _vid, c in captured)
+    assert state.menu_variant_pages[url] == {"basal": 0, "sense_porc": 1}
+    assert "https://x.test/2026/09/vell.pdf" not in state.menu_variant_pages  # podat

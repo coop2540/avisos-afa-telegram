@@ -7,7 +7,7 @@ Veure `proposal.md` — Why. En resum: el menú del menjador ja existeix com a P
 Fonts reals verificades durant l'exploració:
 
 - Pàgina del menjador: `agora.xtec.cat/.../serveis/menjador-escolar/` amb 5 PDFs (menú basal, sense porc via pàgines 1/2 del mateix `Basal-escolar_merged.pdf`, funcionament, preus, què cal portar). El PDF del menú canvia d'URL cada mes (ex. `/2026/09/Basal-escolar_merged.pdf`).
-- PDF del menú: 3 pàgines (1 BASAL, 2 SENSE PORC, 3 sopars — sopars fora d'abast). Text extraïble amb `pdfplumber` (sense OCR), però **0 taules**: és una rejilla de calendari Dilluns–Divendres amb dates a files. `extract_text()` barreja columnes; `extract_words()` amb coordenades sí permet reconstruir les columnes (provat amb el menú real de setembre 2026).
+- PDF del menú: 3 pàgines (1 BASAL, 2 SENSE PORC, 3 sopars — sopars fora d'abast). Text extraïble amb `pdfplumber` (sense OCR), però **0 taules**: és una rejilla de calendari Dilluns–Divendres amb dates a files. `extract_text()` barreja columnes; `extract_words()` amb coordenades sí permet reconstruir les columnes (provat amb el menú real de setembre 2026). *Nota posterior: PDFs de mesos següents surten com a imatge pura (sense capa de texte) — vegeu el canvi `menu-vision`, que afegeix transcripció per visió local sota les condicions d'allà.*
 - Errata real detectada: el dijous 24 de setembre està imprès com a «25» (dues dates «25» a la mateixa fila). Per tant, la data objectiu NO es pot derivar del número imprès sol.
 - Pàgina de calendari: text estructurat amb rangs (vacances «del 21 de desembre al 7 de gener», festes de lliure disposició, festes locals, jornada intensiva). `fetch_calendari.py` actualment només n'extreu títols de secció i un hash — no pas dates normalitzades per a \"és dia lectiu?\".
 
@@ -30,6 +30,8 @@ Restriccions del servei existent (vegeu `afa-elisabadia-avisos/design.md`): proc
 - Sopars (pàgina 3 del PDF) — fora d'\"avui/demà dinem\".
 - Post de 7:45 \"Avui dinem\" (es descarta a favor de \"Demà dinem\" a les 19:00; vegeu D3).
 - OCR ni inferència amb IA sobre el PDF (només `pdfplumber` + coordenades).
+  *Revertit condicionadament pel canvi `menu-vision` per als PDFs sense capa
+  de texte: transcripció local i literal, amb validació del dia imprès.*
 - Edició dels missatges diaris ja publicats (només es refresca el pin quan cal).
 - Creació/edició de topics via API (es creen a mà; el servei només hi escriu).
 - Creuar el menú amb preferències al·lèrgies o dietes per família (filtre = topic, no registre).
@@ -46,7 +48,7 @@ Restriccions del servei existent (vegeu `afa-elisabadia-avisos/design.md`): proc
 
 - **Tria:** per cada pàgina de variant (1=basal, 2=sense porc): `extract_words()`; fronteres de columna a partir de la capçalera `DILLUNS DIMARTS DIMECRES DIJOUS DIVENDRES` (mig entre `x1` d'un i `x0` del següent); files de setmana agrupant les dates per `top` amb tolerància (~25px). Cel·la del dia = paraules dins (columna, franja de fila) ordenades per `(top, x0)` i agrupades en línies. Mes/any del títol (`SETEMBRE`) + any de l'URL (`/2026/09/`). Data objectiu resolta pel **dilluns de la fila + índex de columna** (0–4), NO pel número imprès.
 - **Per què:** `extract_text()` barreja columnes (provat: la pàgina 2 surt encabalgada); `extract_tables()` retorna 0 taules (la rejilla no té línies de taula que pdfplumber detecti). Les coordenades sí funcionen — verificat amb el PDF real. L'ancla pel dilluns tolera l'errata 24→25 detectada. Sense categories inventades (no sabem si la línia 2 és \"segon\" o \"guarnició\"): es llisen tal qual.
-- **Descartat:** OCR (hi ha text de veritat); regex sobre `extract_text()` (fràgil davant el desordre de columnes); confiar en el número de dia imprès (errata real al PDF); PyMuPDF (dependència nova quan `pdfplumber` ja serveix).
+- **Descartat:** OCR (hi ha text de veritat; als PDFs sense text de mesos posteriors s'ha optat per visió local — vegeu `menu-vision`); regex sobre `extract_text()` (fràgil davant el desordre de columnes); confiar en el número de dia imprès (errata real al PDF); PyMuPDF (dependència nova quan `pdfplumber` ja serveix).
 
 ### D3 — Slot diari: 19:00 \"Demà dinem\" (no 7:45 \"Avui dinem\")
 

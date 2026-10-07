@@ -137,3 +137,83 @@ def test_validate_requires_token_unless_dry_run(monkeypatch):
         cfg.validate_for_run()
     cfg.telegram.dry_run = True
     cfg.validate_for_run()  # no ha de llançar
+
+
+# --- menu.vision (canvi menu-vision) ------------------------------------------
+
+
+def _write_vision(tmp_path, vision_yaml: str):
+    p = tmp_path / "config.yaml"
+    p.write_text(
+        "site:\n  base_url: 'https://x.test'\n  homepage: 'https://x.test/'\n"
+        "  feed: 'https://x.test/feed/'\n  calendari_page: 'https://x.test/cal/'\n"
+        "menu:\n  enabled: true\n" + vision_yaml,
+        encoding="utf-8",
+    )
+    return p
+
+
+def test_menu_vision_absent_is_disabled_with_defaults():
+    cfg = load_config("config.yaml.example")
+    assert cfg.menu.vision.enabled is False
+    assert cfg.menu.vision.url.startswith("http")
+    assert cfg.menu.vision.model
+    assert cfg.menu.vision.timeout_s > 0
+    assert cfg.menu.vision.markers["basal"] == ["BASAL"]
+
+
+def test_menu_vision_section_is_parsed(tmp_path):
+    cfg = load_config(
+        _write_vision(
+            tmp_path,
+            "  vision:\n    enabled: true\n    url: 'http://192.168.0.18:11434/api/chat'\n"
+            "    model: 'qwen3-vl:2b'\n    timeout_s: 45\n"
+            "    markers:\n      basal: ['BASAL']\n      sense_porc: ['NO PORC']\n",
+        )
+    )
+    v = cfg.menu.vision
+    assert v.enabled is True
+    assert v.url == "http://192.168.0.18:11434/api/chat"
+    assert v.model == "qwen3-vl:2b"
+    assert v.timeout_s == 45.0
+    assert v.markers == {"basal": ["BASAL"], "sense_porc": ["NO PORC"]}
+
+
+def test_menu_vision_empty_section_uses_defaults(tmp_path):
+    cfg = load_config(_write_vision(tmp_path, "  vision:\n"))
+    assert cfg.menu.vision.enabled is False
+    assert cfg.menu.vision.markers["sense_porc"] == ["NO PORC", "SENSE PORC"]
+
+
+def test_menu_vision_invalid_url_raises(tmp_path):
+    with pytest.raises(ConfigError, match="url"):
+        load_config(_write_vision(tmp_path, "  vision:\n    url: 'ftp://x'\n"))
+
+
+def test_menu_vision_invalid_model_raises(tmp_path):
+    with pytest.raises(ConfigError, match="model"):
+        load_config(_write_vision(tmp_path, "  vision:\n    model: '   '\n"))
+
+
+def test_menu_vision_invalid_timeout_raises(tmp_path):
+    with pytest.raises(ConfigError, match="timeout_s"):
+        load_config(_write_vision(tmp_path, "  vision:\n    timeout_s: 'ara'\n"))
+    with pytest.raises(ConfigError, match="timeout_s"):
+        load_config(_write_vision(tmp_path, "  vision:\n    timeout_s: 0\n"))
+
+
+def test_menu_vision_invalid_markers_raises(tmp_path):
+    with pytest.raises(ConfigError, match="markers"):
+        load_config(_write_vision(tmp_path, "  vision:\n    markers: ['BASAL']\n"))
+    with pytest.raises(ConfigError, match="markers.basal"):
+        load_config(_write_vision(tmp_path, "  vision:\n    markers:\n      basal: []\n"))
+    with pytest.raises(ConfigError, match="markers.basal"):
+        load_config(
+            _write_vision(tmp_path, "  vision:\n    markers:\n      basal: ['  ']\n")
+        )
+
+
+def test_real_config_enables_vision():
+    cfg = load_config("config.yaml")
+    assert cfg.menu.vision.enabled is True
+    assert cfg.menu.vision.model == "qwen3-vl:2b"

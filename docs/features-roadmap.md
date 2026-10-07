@@ -26,9 +26,10 @@ en mica i perquè altres associacions vegin cap a on va.
 - ✅ **Aprovació de membres** semi-automàtica (avís a l'admin amb botons,
   filtres opt-in només de rebuig).
 - ✅ Missatge de **benvinguda + normes** (fins i tot fixat).
-- 📋 **Menú del menjador diari**: el menú de demà a les 19:00 als topics de cada
+- ✅ **Menú del menjador diari**: el menú de demà a les 19:00 als topics de cada
   variant (basal / sense porc), amb salt de dies no lectius i missatge fixat amb
-  l'enllaç al PDF vigent.
+  l'enllaç al PDF vigent. Els PDFs sense capa de texte es transcriuen amb
+  **visió local (Ollama)** sota validació estricta (canvi `menu-vision`).
 - 🟡 **Topics per curs actius**: decisio pendent (tants topics com cursos
   omple el grup; alternatives: per tipus o per cicle).
 - 💡 Enllaços d'invitació amb **caducitat** i rotació (ja s'usen; formalitzar).
@@ -44,13 +45,18 @@ en mica i perquè altres associacions vegin cap a on va.
 
 ## Fase D — Assistència amb IA 💡
 
+- ✅ **Visió local per al menú** (canvi `menu-vision`): transcripció literal de
+  PDFs sense texte amb Ollama al mateix servidor, validació estricta del dia
+  imprès; si el motor falla, no es publica. Resum anterior: *descartada
+  l'extracció per IA* → revertit condicionadament (D2 del canvi).
 - 💡 **Resums** de la carta adaptats a cada curs (models gratuïts d'OpenRouter).
 - 💡 Resposta a **preguntes freqüents** sobre el contingut ja publicat.
 - 💡 **Butlletí setmanal** automàtic.
 - 💡 Redacció/ajuda per als missatges de l'AFA.
 - ⛔ **Criteri ferm:** cap funcionalitat d'IA calcula dates ni inventa dades.
   Les dades dures sempre vénen del contingut publicat pel centre.
-- 💡 Documentar a transparència "com s'usa la IA" quan arribi el moment.
+- ✅ "Com s'usa la IA" documentat a `docs/transparencia.md` (visió local i
+  privada del menú).
 
 ## Publicació i governança ✅
 
@@ -100,5 +106,6 @@ transversal: multicentre, WhatsApp (si cal), plantilla reutilitzable
 - Mètriques d'ús agregades i anònimes (quants avisos, sense perfilar ningú).
 - **Menú del menjador — xarxa de seguretat**: si el parser del PDF falla (canvi
   de plantilla del centre), avisar l'admin per Telegram per revisar-lo a mà.
-  Es descarta fer servir IA per extreure els plats (risc d'inventar dades;
-  criteri ferm de la Fase D).
+  *Nota (2026-10): la transcripció de PDFs sense texte ja es fa amb visió local
+  i validació estricta (canvi `menu-vision`); el que queda pendent és l'avis a
+  l'admin quan el motor falla i no es publica.*

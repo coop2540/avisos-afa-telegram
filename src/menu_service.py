@@ -13,6 +13,7 @@ from .config import Config, MenuConfig
 from .fetch_menjador import fetch_menu_url
 from .logging_setup import get_logger
 from .menu_calendar import SchoolCalendar, fetch_school_calendar, is_school_day
+from .menu_vision import OllamaVision, VisionError
 from .messages import menu_dema_message, menu_pin_message
 from .parse_menu import load_menu
 from .state import State
@@ -188,13 +189,39 @@ def maybe_publish_menu(
         return result
 
     no_cell: set[str] = set()
+    vision = None
+    if cfg.menu.vision.enabled:
+        vision = OllamaVision(
+            url=cfg.menu.vision.url,
+            model=cfg.menu.vision.model,
+            timeout_s=cfg.menu.vision.timeout_s,
+            markers=cfg.menu.vision.markers,
+        )
+    # Memòria variant→pàgina clau per URL del PDF: canvia cada mes i es
+    # recalcula; les URL velles es descarten (canvi menu-vision, D5).
+    for old_url in list(state.menu_variant_pages):
+        if old_url != pdf_url:
+            del state.menu_variant_pages[old_url]
+    page_cache = state.menu_variant_pages.setdefault(pdf_url, {})
+
     for variant in cfg.menu.active_variants():
         if not should_post_menu(now, cfg.menu, target, state.menu_posted, variant.id):
             continue
         try:
             plates = load_menu(
-                pdf_url, target, page=variant.page, user_agent=cfg.site.user_agent
+                pdf_url,
+                target,
+                page=variant.page,
+                user_agent=cfg.site.user_agent,
+                vision=vision,
+                variant_id=variant.id,
+                page_cache=page_cache,
             )
+        except VisionError as exc:
+            # Fallada del motor: NO es marca `menu_posted` → es reintentarà.
+            result.errors.append(f"menu-{variant.id}: visió: {exc}")
+            log.error("Motor de visió caigut per a la variant %s: %s", variant.id, exc)
+            continue
         except Exception as exc:
             result.errors.append(f"menu-{variant.id}: {exc}")
             log.error("Error obtenint el menú de la variant %s: %s", variant.id, exc)

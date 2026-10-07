@@ -39,6 +39,9 @@ class State:
     menu_pin_ids: dict[str, int] = field(default_factory=dict)
     menu_url_checked_on: str | None = None
     menu_slot_done_on: str | None = None
+    # Memòria variant→pàgina del PDF (URL del PDF → {variant: pàgina}) per no
+    # re-ler el segell del capçalera a cada cicle (canvi menu-vision).
+    menu_variant_pages: dict[str, dict[str, int]] = field(default_factory=dict)
     join_requests: dict[str, dict[str, str]] = field(default_factory=dict)
     version: int = STATE_VERSION
 
@@ -58,6 +61,10 @@ class State:
             menu_pin_ids={k: int(v) for k, v in (data.get("menu_pin_ids") or {}).items()},
             menu_url_checked_on=data.get("menu_url_checked_on"),
             menu_slot_done_on=data.get("menu_slot_done_on"),
+            menu_variant_pages={
+                str(url): {str(vid): int(page) for vid, page in (pages or {}).items()}
+                for url, pages in (data.get("menu_variant_pages") or {}).items()
+            },
             join_requests=dict(data.get("join_requests") or {}),
             version=int(data.get("version", STATE_VERSION)),
         )
@@ -125,6 +132,7 @@ class State:
             "menu_pin_ids": self.menu_pin_ids,
             "menu_url_checked_on": self.menu_url_checked_on,
             "menu_slot_done_on": self.menu_slot_done_on,
+            "menu_variant_pages": self.menu_variant_pages,
             "join_requests": self.join_requests,
         }
         fd, tmp_name = tempfile.mkstemp(dir=str(p.parent), prefix=".state-", suffix=".tmp")

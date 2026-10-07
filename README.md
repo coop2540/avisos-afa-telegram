@@ -29,7 +29,10 @@ Telegram, perquè les famílies no hagin de revisar la web a mà.
   setmanal programada.
 - **Menú del menjador diari**: publica el menú de demà el dia anterior a les
   19:00 als topics de cada variant (basal / sense porc), amb salt de dies no
-  lectius i un missatge fixat amb l'enllaç al PDF vigent.
+  lectius i un missatge fixat amb l'enllaç al PDF vigent. Quan el PDF del mes
+  no té capa de texte (imatge pura), es transcriu amb **visió local i privada**
+  (Ollama, sense dades fora del servidor) i només es publica si el dia imprès
+  valida ([`docs/transparencia.md`](docs/transparencia.md)).
 - **Només els administradors publiquen**; accés per invitació.
 - Estat de deduplicació persistent per no repetir avisos entre reinicis.
 

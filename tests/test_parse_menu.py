@@ -120,3 +120,54 @@ def test_cell_blocks_groups_by_vertical_gap():
     first = " ".join(blocks[0])
     assert "MONGETA TENDRA I" in first
     assert "PATATA" in first
+
+
+def test_word_before_monday_column_limit_is_kept():
+    """«LLUÇ» comença abans del límit de columna de dilluns: no es retalla."""
+    words = _load_words(0)
+    blocks = plates_for_date(words, date(2026, 9, 21), source_url=URL)
+    assert blocks is not None
+    second = " ".join(blocks[1])
+    assert second.startswith("LLUÇ AL FORN AMB ALL I")
+
+
+def test_resolve_monday_handles_partial_week():
+    """La primera setmana d'octubre (dies 1 i 2 a dijous/divendres) dóna
+    dilluns = -2, que ha de resoldre's al mes anterior, no descartar-se."""
+    from src.parse_menu import _monday_day, _resolve_monday
+
+    assert _monday_day([(3, 1), (4, 2)]) == -2
+    assert _resolve_monday(-2, 10, 2026) == date(2026, 9, 28)
+    assert _resolve_monday(5, 10, 2026) == date(2026, 10, 5)
+
+
+def _synthetic_first_week_words() -> list[dict]:
+    """Rejilla mínima d'octubre 2026: només la primera fila (dies 1 i 2)."""
+
+    def w(text: str, x0: float, x1: float, top: float) -> dict:
+        return {"text": text, "x0": x0, "x1": x1, "top": top, "bottom": top + 8}
+
+    words = [
+        w("DILLUNS", 68, 140, 100),
+        w("DIMARTS", 180, 250, 100),
+        w("DIMECRES", 280, 350, 100),
+        w("DIJOUS", 380, 450, 100),
+        w("DIVENDRES", 480, 555, 100),
+        w("1", 400, 410, 150),   # dijous 1 d'octubre
+        w("2", 500, 510, 150),   # divendres 2 d'octubre
+        w("TRUITA", 390, 440, 170),
+        w("POMA", 490, 540, 170),
+    ]
+    return words
+
+
+def test_first_week_of_month_resolves_to_previous_monday():
+    from src.parse_menu import plates_for_date as pfd
+
+    words = _synthetic_first_week_words()
+    url = "https://agora.xtec.cat/escolaelisabadia/wp-content/uploads/usu667/2026/10/menu.pdf"
+    assert pfd(words, date(2026, 10, 1), source_url=url) == [["TRUITA"]]
+    assert pfd(words, date(2026, 10, 2), source_url=url) == [["POMA"]]
+    # Dies fora de la primera fila: no hi ha cel·la.
+    assert pfd(words, date(2026, 10, 7), source_url=url) is None
+    assert pfd(words, date(2026, 9, 30), source_url=url) is None

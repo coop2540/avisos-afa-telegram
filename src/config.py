@@ -131,6 +131,28 @@ class MenuVariant:
 
 
 @dataclass
+class MenuVisionConfig:
+    """Visió local per als PDFs del menú sense capa de texte (canvi menu-vision).
+
+    `url` ha d'apuntar a un Ollama accessible des del lloc on corre el servei:
+    des del contenidor Docker cal l'IP de l'amfitrió (`192.168.0.18`), perquè
+    `127.0.0.1` dins del contenidor és el contenidor mateix. `markers` associa
+    cada variant als textos que poden aparèixer al segell del capçalera.
+    """
+
+    enabled: bool = False
+    url: str = "http://192.168.0.18:11434/api/chat"
+    model: str = "qwen3-vl:2b"
+    timeout_s: float = 90.0
+    markers: dict[str, list[str]] = field(
+        default_factory=lambda: {
+            "basal": ["BASAL"],
+            "sense_porc": ["NO PORC", "SENSE PORC"],
+        }
+    )
+
+
+@dataclass
 class MenuConfig:
     enabled: bool = False
     hora: tuple[int, int] = (19, 0)
@@ -145,6 +167,7 @@ class MenuConfig:
             MenuVariant(id="sense_porc", page=1, topic="menu_sense_porc"),
         ]
     )
+    vision: MenuVisionConfig = field(default_factory=MenuVisionConfig)
 
     def active_variants(self) -> list[MenuVariant]:
         return [v for v in self.variants if v.enabled]
@@ -204,6 +227,52 @@ def _parse_hhmm(value: Any, default: tuple[int, int] = (8, 0)) -> tuple[int, int
     if 0 <= hour < 24 and 0 <= minute < 60:
         return (hour, minute)
     return default
+
+
+def _parse_menu_vision(value: Any) -> MenuVisionConfig:
+    """Parseja `menu.vision`; secció absent = per defecte (desactivat)."""
+    defaults = MenuVisionConfig()
+    if value is None:
+        return defaults
+    if not isinstance(value, dict):
+        raise ConfigError("'menu.vision' ha de ser un mapa.")
+
+    url = str(value.get("url") or defaults.url)
+    if not url.startswith(("http://", "https://")):
+        raise ConfigError("'menu.vision.url' ha de començar per http:// o https://.")
+    model = str(value.get("model") or defaults.model)
+    if not model.strip():
+        raise ConfigError("'menu.vision.model' no pot ser buit.")
+    try:
+        timeout_s = float(value.get("timeout_s", defaults.timeout_s))
+    except (TypeError, ValueError):
+        raise ConfigError("'menu.vision.timeout_s' ha de ser un nombre.") from None
+    if timeout_s <= 0:
+        raise ConfigError("'menu.vision.timeout_s' ha de ser positiu.")
+
+    markers_raw = value.get("markers")
+    if markers_raw is None:
+        markers = dict(defaults.markers)
+    elif not isinstance(markers_raw, dict):
+        raise ConfigError("'menu.vision.markers' ha de ser un mapa variant → llista de textos.")
+    else:
+        markers = {}
+        for vid, texts in markers_raw.items():
+            if not isinstance(texts, list) or not texts:
+                raise ConfigError(
+                    f"'menu.vision.markers.{vid}' ha de ser una llista de textos no buida."
+                )
+            if not all(isinstance(t, str) and t.strip() for t in texts):
+                raise ConfigError(f"'menu.vision.markers.{vid}' conté un text buit.")
+            markers[str(vid)] = [t.strip() for t in texts]
+
+    return MenuVisionConfig(
+        enabled=_as_bool(value.get("enabled"), defaults.enabled),
+        url=url,
+        model=model,
+        timeout_s=timeout_s,
+        markers=markers,
+    )
 
 
 def load_config(config_path: str | Path | None = None) -> Config:
@@ -345,6 +414,7 @@ def load_config(config_path: str | Path | None = None) -> Config:
             )
         ],
         variants=variants,
+        vision=_parse_menu_vision(menu_raw.get("vision")),
     )
 
     language = normalize_language(os.environ.get("LANGUAGE") or raw.get("language"))

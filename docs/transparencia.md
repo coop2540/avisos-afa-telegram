@@ -56,7 +56,8 @@ Només de fonts **públiques** del centre:
 - El **calendari del curs** (pàgina pública del centre).
 - Les **notícies** del blog (RSS públic), filtrades per curs i temes generals.
 - El **menú del menjador** (PDF mensual de la pàgina del menjador), per publicar
-  els plats de demà el dia abans.
+  els plats de demà el dia abans. Si el PDF ve **sense text seleccionable**, es
+  llegeix amb IA local i privada (apartat «Què NO fa»).
 
 No accedim a cap àrea privada, ni a Google Classroom, ni a dades
 d'alumnes.
@@ -98,8 +99,13 @@ l'AFA la pot assumir directament. El programari és obert i auditable.
   classe. Si una cosa no es publica a la web del centre, aquest servei no
   la pot saber.
 - No tradueix: publiquem en **català**, com el centre.
-- No respon preguntes ni genera resums amb intel·ligència artificial en la
-  fase actual.
+- No respon preguntes ni genera resums: publiquem el que diuen les fonts.
+- **IA local i privada.** Quan el PDF del menú ve sense text seleccionable, es
+  llegeix amb un model d'intel·ligència artificial que **funciona al mateix
+  ordinador del servei** (sense núvol, sense externs). Serveix només per
+  **transcriure** el que ja està imprès al calendari: no inventa plats, no
+  resumeix, no tradueix i **no envia res a cap servei de tercers**. Si no se'n
+  surt, aquell dia no es publica el menú abans que publicar-ho malament.
 - No envia missatges privats a famílies: només publica al grup.
 
 ## Estat del servei (fases)

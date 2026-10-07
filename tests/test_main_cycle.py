@@ -308,7 +308,7 @@ def test_menu_publishes_in_cycle(monkeypatch, tmp_path):
         ),
     )
     monkeypatch.setattr(
-        menu_mod, "load_menu", lambda url, target, page, user_agent: ["CREMA", "PA"]
+        menu_mod, "load_menu", lambda *a, **k: ["CREMA", "PA"]
     )
     client = FakeClient()
     now = datetime(2026, 9, 23, 19, 0, tzinfo=timezone.utc)

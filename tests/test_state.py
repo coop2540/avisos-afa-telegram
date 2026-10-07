@@ -96,6 +96,22 @@ def test_old_state_without_menu_keys(tmp_path):
     assert state.menu_slot_done_on is None
     assert state.menu_posted == {}
     assert state.menu_pin_ids == {}
+    assert state.menu_variant_pages == {}
+
+
+def test_menu_variant_pages_round_trip(tmp_path):
+    """Memòria variant→pàgina (canvi menu-vision): sobreviu a desat/carrega."""
+    path = tmp_path / "state.json"
+    state = State()
+    state.menu_variant_pages = {
+        "https://x.test/2026/10/m.pdf": {"basal": 0, "sense_porc": 3}
+    }
+    state.save(path)
+
+    loaded = State.load(path)
+    assert loaded.menu_variant_pages == {
+        "https://x.test/2026/10/m.pdf": {"basal": 0, "sense_porc": 3}
+    }
 
 
 # --- reload (procés extern, ex. --once) -----------------------------------

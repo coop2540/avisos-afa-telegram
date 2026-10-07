@@ -109,8 +109,10 @@ menu:
     - "funcionament"
     - "preus"
     - "que-cal-portar"
-  # Variants del menú: cada una és una pàgina del PDF i un topic.
-  # IMPORTANT: `page` és l'índex 0-based de la pàgina del PDF (0=basal, 1=sense porc).
+  # Variants del menú: cada una és un topic; la pàgina del PDF es detecta pel
+  # segell del capçalera quan `vision.enabled` és true. `page` és l'índex
+  # 0-based de la pàgina del PDF (0=basal, 1=sense porc) i es fa servir només
+  # com a pista de fallback si no es pot llegir cap segell.
   variants:
     - id: basal
       page: 0
@@ -120,3 +122,17 @@ menu:
       page: 1
       topic: menu_sense_porc
       enabled: true
+  # Visió local per als PDFs sense capa de texte (alguns mesos l'escaneig del
+  # centre no en inclou). Ollama ha de ser accessible des d'on corre el servei:
+  # des del contenidor Docker, l'IP de l'amfitrió (127.0.0.1 no hi arriba).
+  # IA exclusivament local i privada, només per transcriure; si el motor falla,
+  # no es publica i es reintenta. Vegeu docs/transparencia.md.
+  vision:
+    enabled: false
+    url: "http://192.168.0.18:11434/api/chat"
+    model: "qwen3-vl:2b"
+    timeout_s: 90
+    # Textos que identifiquen cada variant al segell del capçalera de la pàgina.
+    markers:
+      basal: ["BASAL"]
+      sense_porc: ["NO PORC", "SENSE PORC"]
